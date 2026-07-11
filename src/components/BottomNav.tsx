@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, Home, LineChart, Plus, User } from "lucide-react";
+import { BookOpen, Home, LineChart, Sparkles, User } from "lucide-react";
 
 const LEFT_TABS = [
   { to: "/home", label: "Home", Icon: Home },
@@ -53,13 +53,13 @@ export function BottomNav() {
           ))}
 
           <div className="relative -top-4 flex justify-center">
-            <button
-              type="button"
-              aria-label="Quick log"
+            <Link
+              to="/chat"
+              aria-label="Ask Nurture AI"
               className="grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-float ring-4 ring-background transition-transform active:scale-95"
             >
-              <Plus className="h-6 w-6" />
-            </button>
+              <Sparkles className="h-6 w-6" />
+            </Link>
           </div>
 
           {RIGHT_TABS.map(({ to, label, Icon }) => (
