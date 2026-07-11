@@ -10,10 +10,19 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
+import { PREGNANCY_PHOTO } from "@/lib/theme";
 
 export const Route = createFileRoute("/home")({
   component: HomeScreen,
 });
+
+const QUICK_ACTIONS = [
+  { label: "Symptom", Icon: HeartPulse, tone: "primary" as const },
+  { label: "Water", Icon: Droplet, tone: "accent" as const },
+  { label: "Meal", Icon: Salad, tone: "primary" as const },
+  { label: "Sleep", Icon: Moon, tone: "accent" as const },
+];
+
 
 const QUICK_ACTIONS = [
   { label: "Symptom", Icon: HeartPulse, tone: "primary" as const },
