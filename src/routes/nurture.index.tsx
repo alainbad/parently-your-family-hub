@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { threadsQuery, createThread, deleteThread } from "@/lib/chat-threads";
 import { formatDistanceToNow } from "date-fns";
 
-export const Route = createFileRoute("/nurture")({
+export const Route = createFileRoute("/nurture/")({
   component: NurtureThreads,
 });
 
