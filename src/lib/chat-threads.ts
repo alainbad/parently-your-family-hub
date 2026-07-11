@@ -9,7 +9,15 @@ export type ChatThread = {
   updated_at: string;
 };
 
-export type MessagePart = { type: string; text?: string; [key: string]: unknown };
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+export type MessagePart = { type: string; text?: string } & Record<string, JsonValue | undefined>;
 
 export type StoredMessage = {
   id: string;
