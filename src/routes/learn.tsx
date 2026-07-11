@@ -37,7 +37,7 @@ function LearnScreen() {
       <ScreenHeader eyebrow="Learn" title="Grow with your baby" />
 
       <div className="px-6">
-        <label className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
+        <label className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-[1.25rem] border border-border bg-surface px-4 py-3 shadow-soft">
           <Search className="h-4 w-4 text-ink-soft" />
           <input
             type="search"
@@ -54,10 +54,10 @@ function LearnScreen() {
             {CATEGORIES.map(({ label, Icon, tint }) => (
               <button
                 key={label}
-                className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-3xl border border-border bg-surface p-4 text-left"
+                className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-[1.5rem] border border-border bg-surface p-4 text-left shadow-soft transition-transform active:scale-[0.98]"
               >
                 <span
-                  className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${
+                  className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${
                     tint === "primary"
                       ? "bg-primary-soft text-primary"
                       : "bg-accent-soft text-accent"
@@ -78,15 +78,13 @@ function LearnScreen() {
             <h3 className="font-display text-[17px] font-semibold text-ink">
               Editor's picks
             </h3>
-            <button className="text-xs font-medium text-primary">
-              See all
-            </button>
+            <button className="text-xs font-semibold text-primary">See all</button>
           </div>
           <div className="flex flex-col gap-3">
             {ARTICLES.map((a) => (
               <article
                 key={a.title}
-                className="rounded-3xl border border-border bg-surface p-4"
+                className="rounded-[1.5rem] border border-border bg-surface p-4 shadow-soft"
               >
                 <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                   {a.tag}
