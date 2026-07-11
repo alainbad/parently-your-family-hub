@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Bell, Sparkles } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
-import { PREGNANCY_PHOTO } from "@/lib/theme";
+import { PREGNANCY_PHOTO, THEME_PHOTOS, useTheme } from "@/lib/theme";
 import quickSymptom from "@/assets/quick-symptom.jpg";
 import quickWater from "@/assets/quick-water.jpg";
 import quickMeal from "@/assets/quick-meal.jpg";
@@ -20,6 +20,10 @@ const QUICK_ACTIONS = [
 
 
 function HomeScreen() {
+  const { theme } = useTheme();
+  const heroPhoto = theme === "neutral" ? PREGNANCY_PHOTO : THEME_PHOTOS[theme];
+  const pronoun = theme === "boy" ? "His" : theme === "girl" ? "Her" : "Their";
+
   return (
     <AppShell>
       <ScreenHeader
@@ -41,8 +45,8 @@ function HomeScreen() {
         {/* Hero photo card */}
         <section className="relative overflow-hidden rounded-[2rem] shadow-lift">
           <img
-            src={PREGNANCY_PHOTO}
-            alt="Warm pregnancy moment"
+            src={heroPhoto}
+            alt="Warm parenting moment"
             className="aspect-[4/5] w-full object-cover"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
@@ -55,9 +59,10 @@ function HomeScreen() {
               Baby is the size of an ear of corn.
             </h2>
             <p className="mt-1.5 text-[13px] leading-relaxed opacity-90">
-              Her hearing is developing this week.
+              {pronoun} hearing is developing this week.
             </p>
           </div>
+
           <div className="absolute right-5 top-5 flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur-md">
             <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
             On track
