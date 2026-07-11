@@ -10,6 +10,14 @@ import {
   Users,
 } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
+import { useTheme, type Theme } from "@/lib/theme";
+
+const THEME_OPTIONS: { id: Theme; label: string; swatch: string }[] = [
+  { id: "neutral", label: "Grey", swatch: "oklch(0.55 0.02 260)" },
+  { id: "girl", label: "Pink", swatch: "oklch(0.7 0.13 12)" },
+  { id: "boy", label: "Blue", swatch: "oklch(0.62 0.1 240)" },
+];
+
 
 export const Route = createFileRoute("/profile")({
   component: ProfileScreen,
