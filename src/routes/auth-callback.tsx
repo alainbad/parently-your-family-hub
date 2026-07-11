@@ -15,11 +15,40 @@ function AuthCallback() {
     let cancelled = false;
 
     async function finishSignIn() {
-      const urlError = new URLSearchParams(window.location.hash.slice(1)).get(
-        "error_description",
-      );
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlError =
+        hashParams.get("error_description") ?? searchParams.get("error_description");
       if (urlError) {
         setError(urlError);
+        return;
+      }
+
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      if (accessToken && refreshToken) {
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (cancelled) return;
+        if (setSessionError) {
+          setError(setSessionError.message);
+          return;
+        }
+        navigate({ to: "/home", replace: true });
+        return;
+      }
+
+      const code = searchParams.get("code");
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (cancelled) return;
+        if (exchangeError) {
+          setError(exchangeError.message);
+          return;
+        }
+        navigate({ to: "/home", replace: true });
         return;
       }
 
