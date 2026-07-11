@@ -12,12 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as NurtureRouteImport } from './routes/nurture'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as NurtureThreadIdRouteImport } from './routes/nurture.$threadId'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
@@ -32,6 +35,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NurtureRoute = NurtureRouteImport.update({
+  id: '/nurture',
+  path: '/nurture',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnRoute = LearnRouteImport.update({
@@ -64,6 +72,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NurtureThreadIdRoute = NurtureThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => NurtureRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,9 +90,12 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/learn': typeof LearnRoute
+  '/nurture': typeof NurtureRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/track': typeof TrackRoute
+  '/api/chat': typeof ApiChatRoute
+  '/nurture/$threadId': typeof NurtureThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,9 +104,12 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/learn': typeof LearnRoute
+  '/nurture': typeof NurtureRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/track': typeof TrackRoute
+  '/api/chat': typeof ApiChatRoute
+  '/nurture/$threadId': typeof NurtureThreadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,9 +119,12 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/learn': typeof LearnRoute
+  '/nurture': typeof NurtureRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/track': typeof TrackRoute
+  '/api/chat': typeof ApiChatRoute
+  '/nurture/$threadId': typeof NurtureThreadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,9 +135,12 @@ export interface FileRouteTypes {
     | '/home'
     | '/journey'
     | '/learn'
+    | '/nurture'
     | '/onboarding'
     | '/profile'
     | '/track'
+    | '/api/chat'
+    | '/nurture/$threadId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -119,9 +149,12 @@ export interface FileRouteTypes {
     | '/home'
     | '/journey'
     | '/learn'
+    | '/nurture'
     | '/onboarding'
     | '/profile'
     | '/track'
+    | '/api/chat'
+    | '/nurture/$threadId'
   id:
     | '__root__'
     | '/'
@@ -130,9 +163,12 @@ export interface FileRouteTypes {
     | '/home'
     | '/journey'
     | '/learn'
+    | '/nurture'
     | '/onboarding'
     | '/profile'
     | '/track'
+    | '/api/chat'
+    | '/nurture/$threadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -142,9 +178,11 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   JourneyRoute: typeof JourneyRoute
   LearnRoute: typeof LearnRoute
+  NurtureRoute: typeof NurtureRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
   TrackRoute: typeof TrackRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -168,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nurture': {
+      id: '/nurture'
+      path: '/nurture'
+      fullPath: '/nurture'
+      preLoaderRoute: typeof NurtureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learn': {
@@ -212,8 +257,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nurture/$threadId': {
+      id: '/nurture/$threadId'
+      path: '/$threadId'
+      fullPath: '/nurture/$threadId'
+      preLoaderRoute: typeof NurtureThreadIdRouteImport
+      parentRoute: typeof NurtureRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface NurtureRouteChildren {
+  NurtureThreadIdRoute: typeof NurtureThreadIdRoute
+}
+
+const NurtureRouteChildren: NurtureRouteChildren = {
+  NurtureThreadIdRoute: NurtureThreadIdRoute,
+}
+
+const NurtureRouteWithChildren =
+  NurtureRoute._addFileChildren(NurtureRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -222,9 +292,11 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   JourneyRoute: JourneyRoute,
   LearnRoute: LearnRoute,
+  NurtureRoute: NurtureRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
   TrackRoute: TrackRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

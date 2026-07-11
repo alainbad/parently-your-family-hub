@@ -1,14 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Lock, Sparkles, Check, Loader2, RefreshCcw } from "lucide-react";
+import { Lock, Sparkles, Check, Loader2, RefreshCcw, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import {
+  getDevUnlock,
   hasAiChatEntitlement,
   identifyUser,
   isNativeApp,
   restorePurchases,
+  setDevUnlock,
   startAiChatTrial,
 } from "@/lib/purchases";
 
@@ -156,9 +158,20 @@ function ChatScreen() {
               </button>
 
               {!native ? (
-                <p className="mt-3 rounded-xl bg-background/60 p-3 text-center text-[11px] text-muted-foreground">
-                  Preview mode — purchases run inside the iOS/Android app build.
-                </p>
+                <div className="mt-3 rounded-xl bg-background/60 p-3 text-center text-[11px] text-muted-foreground">
+                  <p>Preview mode — purchases run inside the iOS/Android app build.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDevUnlock(true);
+                      setEntitled(true);
+                      toast.success("Preview unlocked.");
+                    }}
+                    className="mt-2 text-primary underline"
+                  >
+                    Unlock for preview testing
+                  </button>
+                </div>
               ) : null}
             </div>
           </div>
@@ -169,6 +182,7 @@ function ChatScreen() {
 }
 
 function UnlockedPlaceholder() {
+  const dev = getDevUnlock();
   return (
     <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
       <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
@@ -179,8 +193,27 @@ function UnlockedPlaceholder() {
         Nurture AI is ready
       </h2>
       <p className="mt-2 text-sm text-ink-soft">
-        Chat interface coming next — subscription is active.
+        Ask about sleep, feeding, symptoms, milestones, or anything on your mind.
       </p>
+      <Link
+        to="/nurture"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-float active:scale-[0.98]"
+      >
+        <MessageSquare className="h-4 w-4" />
+        Open Nurture chat
+      </Link>
+      {dev ? (
+        <button
+          type="button"
+          onClick={() => {
+            setDevUnlock(false);
+            location.reload();
+          }}
+          className="mt-3 w-full text-center text-[11px] text-muted-foreground underline"
+        >
+          Lock preview again
+        </button>
+      ) : null}
     </div>
   );
 }

@@ -32,7 +32,21 @@ export async function identifyUser(userId: string): Promise<void> {
   await mod.Purchases.logIn({ appUserID: userId });
 }
 
+const DEV_UNLOCK_KEY = "nurture_dev_unlock";
+
+export function setDevUnlock(on: boolean) {
+  if (typeof window === "undefined") return;
+  if (on) localStorage.setItem(DEV_UNLOCK_KEY, "1");
+  else localStorage.removeItem(DEV_UNLOCK_KEY);
+}
+
+export function getDevUnlock(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(DEV_UNLOCK_KEY) === "1";
+}
+
 export async function hasAiChatEntitlement(): Promise<boolean> {
+  if (getDevUnlock()) return true;
   const mod = await loadPurchases();
   if (!mod) return false;
   const info = await mod.Purchases.getCustomerInfo();
