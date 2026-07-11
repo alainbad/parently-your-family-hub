@@ -156,14 +156,15 @@ function HomeScreen() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white/15 px-3 py-2.5 backdrop-blur">
+    <div className="rounded-2xl border border-border bg-surface px-3 py-2.5 text-ink shadow-soft">
       <div className="font-display text-lg font-semibold">{value}</div>
-      <div className="text-[11px] uppercase tracking-wider opacity-80">
+      <div className="text-[11px] uppercase tracking-wider text-ink-soft">
         {label}
       </div>
     </div>
   );
 }
+
 
 function TodayCard({
   Icon,
