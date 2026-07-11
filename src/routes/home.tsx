@@ -1,25 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Bell,
-  Droplet,
-  HeartPulse,
-  Moon,
-  Salad,
-  Sparkles,
-} from "lucide-react";
+import { Bell, Sparkles } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { PREGNANCY_PHOTO } from "@/lib/theme";
+import quickSymptom from "@/assets/quick-symptom.jpg";
+import quickWater from "@/assets/quick-water.jpg";
+import quickMeal from "@/assets/quick-meal.jpg";
+import quickSleep from "@/assets/quick-sleep.jpg";
 
 export const Route = createFileRoute("/home")({
   component: HomeScreen,
 });
 
 const QUICK_ACTIONS = [
-  { label: "Symptom", sub: "Log how you feel", Icon: HeartPulse, tone: "primary" as const },
-  { label: "Water", sub: "1.2L today", Icon: Droplet, tone: "accent" as const },
-  { label: "Meal", sub: "Track nutrition", Icon: Salad, tone: "primary" as const },
-  { label: "Sleep", sub: "Last: 7h 30m", Icon: Moon, tone: "accent" as const },
+  { label: "Symptom", sub: "Log how you feel", photo: quickSymptom },
+  { label: "Water", sub: "1.2L today", photo: quickWater },
+  { label: "Meal", sub: "Track nutrition", photo: quickMeal },
+  { label: "Sleep", sub: "Last: 7h 30m", photo: quickSleep },
 ];
+
 
 function HomeScreen() {
   return (
@@ -75,27 +73,29 @@ function HomeScreen() {
             <button className="text-xs font-semibold text-primary">View all</button>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {QUICK_ACTIONS.map(({ label, sub, Icon, tone }) => (
+            {QUICK_ACTIONS.map(({ label, sub, photo }) => (
               <button
                 key={label}
-                className="flex flex-col gap-4 rounded-[1.5rem] border border-border bg-surface p-5 text-left shadow-soft transition-transform active:scale-[0.98]"
+                className="flex flex-col gap-4 overflow-hidden rounded-[1.5rem] border border-border bg-surface p-3 text-left shadow-soft transition-transform active:scale-[0.98]"
               >
-                <span
-                  className={`grid h-11 w-11 place-items-center rounded-full ${
-                    tone === "primary"
-                      ? "bg-primary-soft text-primary"
-                      : "bg-accent-soft text-accent"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div className="min-w-0">
+                <div className="overflow-hidden rounded-[1.1rem]">
+                  <img
+                    src={photo}
+                    alt={label}
+                    loading="lazy"
+                    width={1024}
+                    height={1024}
+                    className="aspect-square w-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0 px-2 pb-1">
                   <p className="text-[13px] font-semibold text-ink">{label}</p>
                   <p className="mt-0.5 text-[11px] text-ink-soft">{sub}</p>
                 </div>
               </button>
             ))}
           </div>
+
         </section>
 
         {/* Tip card */}
