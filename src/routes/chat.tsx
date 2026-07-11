@@ -119,7 +119,7 @@ function ChatScreen() {
                 <div className="flex items-baseline justify-between">
                   <span className="text-sm font-semibold text-ink">Monthly</span>
                   <span className="font-display text-xl font-semibold text-ink">
-                    $6.99<span className="text-xs font-medium text-ink-soft">/mo</span>
+                    $2.99<span className="text-xs font-medium text-ink-soft">/mo</span>
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-ink-soft">
