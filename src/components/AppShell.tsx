@@ -22,14 +22,14 @@ export function ScreenHeader({
   right?: ReactNode;
 }) {
   return (
-    <header className="safe-top grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 px-6 pb-4 pt-6">
+    <header className="safe-top grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 px-6 pb-5 pt-6">
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-1 font-display text-[28px] leading-tight font-medium text-ink">
+        <h1 className="mt-1 font-display text-[26px] leading-[1.1] font-semibold text-ink">
           {title}
         </h1>
         {subtitle ? (
