@@ -16,11 +16,11 @@ import { Route as LearnRouteImport } from './routes/learn'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as AuthCallbackRouteImport } from './routes/auth-callback'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NurtureIndexRouteImport } from './routes/nurture.index'
 import { Route as NurtureThreadIdRouteImport } from './routes/nurture.$threadId'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const TrackRoute = TrackRouteImport.update({
@@ -58,6 +58,11 @@ const ChatRoute = ChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth-callback',
+  path: '/auth-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -78,11 +83,6 @@ const NurtureThreadIdRoute = NurtureThreadIdRouteImport.update({
   path: '/nurture/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/callback',
-  path: '/callback',
-  getParentRoute: () => AuthRoute,
-} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -91,7 +91,8 @@ const ApiChatRoute = ApiChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/auth-callback': typeof AuthCallbackRoute
   '/chat': typeof ChatRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
@@ -100,13 +101,13 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
-  '/auth/callback': typeof AuthCallbackRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
   '/nurture/': typeof NurtureIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/auth-callback': typeof AuthCallbackRoute
   '/chat': typeof ChatRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
@@ -115,14 +116,14 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
-  '/auth/callback': typeof AuthCallbackRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
   '/nurture': typeof NurtureIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/auth-callback': typeof AuthCallbackRoute
   '/chat': typeof ChatRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
@@ -131,7 +132,6 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
-  '/auth/callback': typeof AuthCallbackRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
   '/nurture/': typeof NurtureIndexRoute
 }
@@ -140,6 +140,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/auth-callback'
     | '/chat'
     | '/home'
     | '/journey'
@@ -148,13 +149,13 @@ export interface FileRouteTypes {
     | '/profile'
     | '/track'
     | '/api/chat'
-    | '/auth/callback'
     | '/nurture/$threadId'
     | '/nurture/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/auth-callback'
     | '/chat'
     | '/home'
     | '/journey'
@@ -163,13 +164,13 @@ export interface FileRouteTypes {
     | '/profile'
     | '/track'
     | '/api/chat'
-    | '/auth/callback'
     | '/nurture/$threadId'
     | '/nurture'
   id:
     | '__root__'
     | '/'
     | '/auth'
+    | '/auth-callback'
     | '/chat'
     | '/home'
     | '/journey'
@@ -178,14 +179,14 @@ export interface FileRouteTypes {
     | '/profile'
     | '/track'
     | '/api/chat'
-    | '/auth/callback'
     | '/nurture/$threadId'
     | '/nurture/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   ChatRoute: typeof ChatRoute
   HomeRoute: typeof HomeRoute
   JourneyRoute: typeof JourneyRoute
@@ -249,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth-callback': {
+      id: '/auth-callback'
+      path: '/auth-callback'
+      fullPath: '/auth-callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -277,13 +285,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NurtureThreadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -294,19 +295,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthRouteChildren {
-  AuthCallbackRoute: typeof AuthCallbackRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthCallbackRoute: AuthCallbackRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthRoute: AuthRouteWithChildren,
+  AuthRoute: AuthRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   ChatRoute: ChatRoute,
   HomeRoute: HomeRoute,
   JourneyRoute: JourneyRoute,
