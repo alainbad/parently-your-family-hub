@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Check, Heart } from "lucide-react";
+import { Check } from "lucide-react";
 import { useTheme, THEME_PHOTOS, type Theme } from "@/lib/theme";
+import logoNewborn from "@/assets/logo-newborn.jpg";
+
 
 export const Route = createFileRoute("/")({
   component: Welcome,
@@ -40,13 +42,19 @@ function Welcome() {
     <div className="relative flex min-h-[100dvh] w-full flex-col bg-gradient-hero">
       <header className="safe-top flex items-center justify-between px-6 pt-6">
         <div className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
-            <Heart className="h-4 w-4" fill="currentColor" />
+          <div className="relative h-9 w-9 overflow-hidden rounded-2xl shadow-soft">
+            <img
+              src={logoNewborn}
+              alt="Parently newborn logo"
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
           </div>
           <span className="font-display text-lg font-semibold tracking-tight text-ink">
             Parently
           </span>
         </div>
+
       </header>
 
       <main className="flex flex-1 flex-col px-6 pt-6">
