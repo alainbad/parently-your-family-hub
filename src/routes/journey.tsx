@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
+import { AffiliateSection, type AffiliatePick } from "@/components/AffiliateCard";
 import journeyScan from "@/assets/journey-scan.jpg";
 import journeyCurrent from "@/assets/journey-current.jpg";
 import journeyGlucose from "@/assets/journey-glucose.jpg";
@@ -11,12 +12,107 @@ export const Route = createFileRoute("/journey")({
   component: JourneyScreen,
 });
 
-const MILESTONES = [
-  { week: "Week 20", title: "Anatomy scan", body: "Detailed ultrasound with your doctor.", state: "done" as const, photo: journeyScan },
-  { week: "Week 24", title: "You are here", body: "Baby's hearing sharpens. Time to plan childbirth classes.", state: "current" as const, photo: journeyCurrent },
-  { week: "Week 28", title: "Glucose test", body: "Screening for gestational diabetes.", state: "upcoming" as const, photo: journeyGlucose },
-  { week: "Week 32", title: "Hospital bag", body: "Start packing essentials for you and baby.", state: "upcoming" as const, photo: journeyBag },
-  { week: "Week 36", title: "Birth plan review", body: "Finalize your preferences with your care team.", state: "upcoming" as const, photo: journeyBirthPlan },
+// TODO: replace `?tag=YOURTAG-20` with your Amazon Associates tag,
+// or swap in Babylist/Target affiliate URLs.
+type Milestone = {
+  week: string;
+  title: string;
+  body: string;
+  state: "done" | "current" | "upcoming";
+  photo: string;
+  picks?: AffiliatePick[];
+};
+
+const MILESTONES: Milestone[] = [
+  {
+    week: "Week 20", title: "Anatomy scan",
+    body: "Detailed ultrasound with your doctor.",
+    state: "done", photo: journeyScan,
+  },
+  {
+    week: "Week 24", title: "You are here",
+    body: "Baby's hearing sharpens. Time to plan childbirth classes.",
+    state: "current", photo: journeyCurrent,
+    picks: [
+      {
+        title: "Belly support band",
+        vendor: "Amazon",
+        price: "$24",
+        blurb: "Eases lower-back pressure as bump grows.",
+        url: "https://www.amazon.com/s?k=maternity+belly+band&tag=YOURTAG-20",
+        emoji: "🤰",
+      },
+      {
+        title: "Prenatal yoga class",
+        vendor: "Glo",
+        price: "$18/mo",
+        blurb: "On-demand classes tailored to each trimester.",
+        url: "https://www.glo.com/?ref=YOURREF",
+        emoji: "🧘",
+      },
+    ],
+  },
+  {
+    week: "Week 28", title: "Glucose test",
+    body: "Screening for gestational diabetes.",
+    state: "upcoming", photo: journeyGlucose,
+    picks: [
+      {
+        title: "Kick counter journal",
+        vendor: "Amazon",
+        price: "$12",
+        blurb: "Track daily fetal movement patterns.",
+        url: "https://www.amazon.com/s?k=kick+count+journal&tag=YOURTAG-20",
+        emoji: "📓",
+      },
+    ],
+  },
+  {
+    week: "Week 32", title: "Hospital bag",
+    body: "Start packing essentials for you and baby.",
+    state: "upcoming", photo: journeyBag,
+    picks: [
+      {
+        title: "Hospital bag essentials kit",
+        vendor: "Babylist",
+        price: "$89",
+        blurb: "Curated bundle: robe, slippers, toiletries, going-home outfit.",
+        url: "https://www.babylist.com/store/hospital-bag?ref=YOURREF",
+        emoji: "🎒",
+      },
+      {
+        title: "Newborn diaper starter pack",
+        vendor: "Amazon",
+        price: "$28",
+        blurb: "Size N + wipes — first two weeks covered.",
+        url: "https://www.amazon.com/s?k=newborn+diapers+size+n&tag=YOURTAG-20",
+        emoji: "🍼",
+      },
+    ],
+  },
+  {
+    week: "Week 36", title: "Birth plan review",
+    body: "Finalize your preferences with your care team.",
+    state: "upcoming", photo: journeyBirthPlan,
+    picks: [
+      {
+        title: "Nursing pillow",
+        vendor: "Amazon",
+        price: "$45",
+        blurb: "Supports baby & saves your shoulders during feeds.",
+        url: "https://www.amazon.com/s?k=nursing+pillow&tag=YOURTAG-20",
+        emoji: "🛋️",
+      },
+      {
+        title: "Baby registry",
+        vendor: "Babylist",
+        price: "Free",
+        blurb: "Add gifts from any store into one shareable list.",
+        url: "https://www.babylist.com/?ref=YOURREF",
+        emoji: "🎁",
+      },
+    ],
+  },
 ];
 
 function JourneyScreen() {
