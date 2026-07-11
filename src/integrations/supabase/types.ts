@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      quick_logs: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          user_id: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          user_id: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          user_id?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
