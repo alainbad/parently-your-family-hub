@@ -48,6 +48,8 @@ function ProfileScreen() {
       <ScreenHeader eyebrow="Profile" title="You & your family" />
 
       <div className="px-6">
+        <ThemePicker />
+
         <section className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4">
             <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-sage font-display text-lg font-semibold text-primary-foreground">
