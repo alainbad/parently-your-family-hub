@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          baby_name: string | null
+          baby_photo_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          baby_name?: string | null
+          baby_photo_url?: string | null
+          created_at?: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          baby_name?: string | null
+          baby_photo_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quick_logs: {
         Row: {
           created_at: string
