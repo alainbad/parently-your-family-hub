@@ -45,29 +45,34 @@ function HomeScreen() {
       />
 
       <div className="px-6">
-        {/* Weekly hero card */}
-        <section className="relative overflow-hidden rounded-4xl bg-gradient-sage p-6 text-primary-foreground shadow-lift">
-          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-6 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] opacity-90">
-            <Sparkles className="h-3.5 w-3.5" />
-            Week 24
-          </div>
-          <h2 className="mt-3 font-display text-[26px] leading-tight font-medium">
-            Baby is the size of an ear of corn.
-          </h2>
-          <p className="mt-2 text-[13.5px] leading-relaxed opacity-90">
-            Her hearing is developing this week — soft voices and gentle music
-            can start to feel familiar.
-          </p>
-
-          <div className="mt-5 grid grid-cols-3 gap-3">
-            <Stat label="Weeks" value="24" />
-            <Stat label="Weight" value="600g" />
-            <Stat label="Length" value="30cm" />
+        {/* Weekly hero — real photo with soft gradient overlay */}
+        <section className="relative overflow-hidden rounded-4xl shadow-lift">
+          <img
+            src={PREGNANCY_PHOTO}
+            alt="Warm pregnancy moment"
+            className="h-64 w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-90">
+              <Sparkles className="h-3.5 w-3.5" />
+              Week 24
+            </div>
+            <h2 className="mt-2 font-display text-[24px] leading-tight font-medium">
+              Baby is the size of an ear of corn.
+            </h2>
+            <p className="mt-1.5 text-[13px] leading-relaxed opacity-90">
+              Her hearing is developing this week — soft voices feel familiar.
+            </p>
           </div>
         </section>
+
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <Stat label="Weeks" value="24" />
+          <Stat label="Weight" value="600g" />
+          <Stat label="Length" value="30cm" />
+        </div>
+
 
         {/* Quick actions */}
         <section className="mt-6">
