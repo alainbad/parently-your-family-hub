@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Bell, Sparkles } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
-import { PREGNANCY_PHOTO } from "@/lib/theme";
+import { PREGNANCY_PHOTO, THEME_PHOTOS, useTheme } from "@/lib/theme";
 import quickSymptom from "@/assets/quick-symptom.jpg";
 import quickWater from "@/assets/quick-water.jpg";
 import quickMeal from "@/assets/quick-meal.jpg";
