@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { threadMessagesQuery, type StoredMessage } from "@/lib/chat-threads";
 import {
@@ -28,7 +27,7 @@ export const Route = createFileRoute("/nurture/$threadId")({
 
 function ThreadChat() {
   const { threadId } = Route.useParams();
-  const { user, loading } = useAuth();
+  const { user, session, loading } = useAuth();
 
   const stored = useQuery({
     ...threadMessagesQuery(threadId),
@@ -55,7 +54,12 @@ function ThreadChat() {
 
   return (
     <ChatShell threadId={threadId}>
-      <ChatWindow key={threadId} threadId={threadId} initialMessages={initialMessages} />
+      <ChatWindow
+        key={threadId}
+        threadId={threadId}
+        token={session?.access_token ?? ""}
+        initialMessages={initialMessages}
+      />
     </ChatShell>
   );
 }
@@ -89,7 +93,7 @@ function ChatShell({
         </div>
       </header>
       <div className="flex-1 overflow-hidden">
-        {loading ? <div className="p-6"><Shimmer text="Loading conversation…" /></div> : children}
+        {loading ? <div className="p-6"><Shimmer>Loading conversation…</Shimmer></div> : children}
       </div>
     </div>
   );
@@ -97,9 +101,11 @@ function ChatShell({
 
 function ChatWindow({
   threadId,
+  token,
   initialMessages,
 }: {
   threadId: string;
+  token: string;
   initialMessages: UIMessage[];
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -109,13 +115,9 @@ function ChatWindow({
       new DefaultChatTransport({
         api: "/api/chat",
         body: { threadId },
-        headers: async () => {
-          const { data } = await supabase.auth.getSession();
-          const token = data.session?.access_token;
-          return token ? { Authorization: `Bearer ${token}` } : {};
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }),
-    [threadId],
+    [threadId, token],
   );
 
   const { messages, sendMessage, status } = useChat({
@@ -169,7 +171,7 @@ function ChatWindow({
           })}
           {status === "submitted" ? (
             <div className="flex justify-start">
-              <Shimmer text="Nurture is thinking…" />
+              <Shimmer>Nurture is thinking…</Shimmer>
             </div>
           ) : null}
         </ConversationContent>
