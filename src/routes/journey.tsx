@@ -193,8 +193,4 @@ function JourneyScreen() {
     </AppShell>
   );
 }
-        </section>
-      </div>
-    </AppShell>
-  );
-}
+
