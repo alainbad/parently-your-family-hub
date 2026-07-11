@@ -45,7 +45,12 @@ export function useSaveProfile(userId: string | undefined) {
         if (upErr) throw upErr;
         storagePath = path;
       }
-      const payload: Record<string, unknown> = { id: userId, updated_at: new Date().toISOString() };
+      const payload: {
+        id: string;
+        updated_at: string;
+        baby_name?: string | null;
+        baby_photo_url?: string;
+      } = { id: userId, updated_at: new Date().toISOString() };
       if (input.baby_name !== undefined) payload.baby_name = input.baby_name;
       if (storagePath) payload.baby_photo_url = storagePath;
       const { error } = await supabase.from("profiles").upsert(payload);
