@@ -46,11 +46,26 @@ function AuthScreen() {
   };
 
   const google = async () => {
+    setBusy(true);
     setError(null);
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth`,
-    });
-    if (res.error) setError(res.error.message ?? "Google sign-in failed");
+    try {
+      const res = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+        extraParams: { prompt: "select_account" },
+      });
+
+      if (res.redirected) return;
+      if (res.error) throw res.error;
+
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      if (!data.session) throw new Error("Google sign-in finished, but no session was saved.");
+
+      navigate({ to: "/home", replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google sign-in failed");
+      setBusy(false);
+    }
   };
 
   return (
@@ -78,9 +93,10 @@ function AuthScreen() {
 
         <button
           onClick={google}
+          disabled={busy}
           className="mt-7 inline-flex h-12 w-full items-center justify-center gap-3 rounded-[1rem] border border-border bg-surface text-[14px] font-semibold text-ink shadow-soft transition-transform active:scale-[0.99]"
         >
-          <GoogleIcon />
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
           Continue with Google
         </button>
 
