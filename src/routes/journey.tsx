@@ -182,9 +182,17 @@ function JourneyScreen() {
                 <div className="mt-1 text-[13px] leading-relaxed text-ink-soft">
                   {m.body}
                 </div>
+                {m.picks?.length ? (
+                  <AffiliateSection title="What you might need now" picks={m.picks} />
+                ) : null}
               </div>
             </article>
           ))}
+        </section>
+      </div>
+    </AppShell>
+  );
+}
         </section>
       </div>
     </AppShell>
