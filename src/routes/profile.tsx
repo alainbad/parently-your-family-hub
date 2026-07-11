@@ -120,3 +120,44 @@ function ProfileScreen() {
     </AppShell>
   );
 }
+
+function ThemePicker() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <section className="mb-6">
+      <h3 className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+        App theme
+      </h3>
+      <div className="rounded-3xl border border-border bg-surface p-4">
+        <div className="text-[13px] text-ink-soft">
+          Same design, tuned to your baby.
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {THEME_OPTIONS.map((opt) => {
+            const active = theme === opt.id;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setTheme(opt.id)}
+                className={`flex flex-col items-center gap-2 rounded-2xl border p-3 transition-all active:scale-[0.97] ${
+                  active
+                    ? "border-primary/50 bg-primary-soft/60 ring-2 ring-primary/30"
+                    : "border-border bg-background"
+                }`}
+              >
+                <span
+                  className="h-8 w-8 rounded-full shadow-soft"
+                  style={{ background: opt.swatch }}
+                />
+                <span className="text-[12.5px] font-semibold text-ink">
+                  {opt.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
