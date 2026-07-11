@@ -1,17 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Circle, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
+import journeyScan from "@/assets/journey-scan.jpg";
+import journeyCurrent from "@/assets/journey-current.jpg";
+import journeyGlucose from "@/assets/journey-glucose.jpg";
+import journeyBag from "@/assets/journey-bag.jpg";
+import journeyBirthPlan from "@/assets/journey-birthplan.jpg";
 
 export const Route = createFileRoute("/journey")({
   component: JourneyScreen,
 });
 
 const MILESTONES = [
-  { week: "Week 20", title: "Anatomy scan", body: "Detailed ultrasound with your doctor.", state: "done" as const },
-  { week: "Week 24", title: "You are here", body: "Baby's hearing sharpens. Time to plan childbirth classes.", state: "current" as const },
-  { week: "Week 28", title: "Glucose test", body: "Screening for gestational diabetes.", state: "upcoming" as const },
-  { week: "Week 32", title: "Hospital bag", body: "Start packing essentials for you and baby.", state: "upcoming" as const },
-  { week: "Week 36", title: "Birth plan review", body: "Finalize your preferences with your care team.", state: "upcoming" as const },
+  { week: "Week 20", title: "Anatomy scan", body: "Detailed ultrasound with your doctor.", state: "done" as const, photo: journeyScan },
+  { week: "Week 24", title: "You are here", body: "Baby's hearing sharpens. Time to plan childbirth classes.", state: "current" as const, photo: journeyCurrent },
+  { week: "Week 28", title: "Glucose test", body: "Screening for gestational diabetes.", state: "upcoming" as const, photo: journeyGlucose },
+  { week: "Week 32", title: "Hospital bag", body: "Start packing essentials for you and baby.", state: "upcoming" as const, photo: journeyBag },
+  { week: "Week 36", title: "Birth plan review", body: "Finalize your preferences with your care team.", state: "upcoming" as const, photo: journeyBirthPlan },
 ];
 
 function JourneyScreen() {
@@ -38,49 +43,52 @@ function JourneyScreen() {
           </div>
         </div>
 
-        <section className="mt-7">
-          <ol className="relative flex flex-col gap-4 pl-2">
-            <span className="absolute left-[19px] top-3 bottom-3 w-px bg-border" />
-            {MILESTONES.map((m) => (
-              <li
-                key={m.title}
-                className="relative grid grid-cols-[40px_minmax(0,1fr)] items-start gap-3"
-              >
+        <section className="mt-7 flex flex-col gap-4">
+          {MILESTONES.map((m) => (
+            <article
+              key={m.title}
+              className={`overflow-hidden rounded-[1.75rem] border shadow-soft ${
+                m.state === "current"
+                  ? "border-accent/40 bg-accent-soft/40"
+                  : "border-border bg-surface"
+              }`}
+            >
+              <div className="relative">
+                <img
+                  src={m.photo}
+                  alt={m.title}
+                  loading="lazy"
+                  width={1024}
+                  height={1024}
+                  className={`aspect-[16/9] w-full object-cover ${
+                    m.state === "upcoming" ? "opacity-70" : ""
+                  }`}
+                />
                 <span
-                  className={`z-10 grid h-10 w-10 place-items-center rounded-full border-2 ${
+                  className={`absolute left-4 top-4 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] backdrop-blur ${
                     m.state === "done"
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "bg-primary/90 text-primary-foreground"
                       : m.state === "current"
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-surface text-ink-soft"
+                        ? "bg-accent/90 text-accent-foreground"
+                        : "bg-white/80 text-ink-soft"
                   }`}
                 >
-                  {m.state === "done" ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Circle className="h-3 w-3" fill="currentColor" />
-                  )}
+                  {m.state === "done" ? "Done" : m.state === "current" ? "Now" : "Upcoming"}
                 </span>
-                <div
-                  className={`min-w-0 rounded-[1.5rem] border p-4 ${
-                    m.state === "current"
-                      ? "border-accent/40 bg-accent-soft/50"
-                      : "border-border bg-surface"
-                  }`}
-                >
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                    {m.week}
-                  </div>
-                  <div className="mt-1 font-display text-[16px] font-semibold text-ink">
-                    {m.title}
-                  </div>
-                  <div className="mt-1 text-[13px] leading-relaxed text-ink-soft">
-                    {m.body}
-                  </div>
+              </div>
+              <div className="p-5">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  {m.week}
                 </div>
-              </li>
-            ))}
-          </ol>
+                <div className="mt-1 font-display text-[17px] font-semibold text-ink">
+                  {m.title}
+                </div>
+                <div className="mt-1 text-[13px] leading-relaxed text-ink-soft">
+                  {m.body}
+                </div>
+              </div>
+            </article>
+          ))}
         </section>
       </div>
     </AppShell>

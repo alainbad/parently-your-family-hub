@@ -1,16 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookOpen, GraduationCap, PlayCircle, Search, ShieldPlus } from "lucide-react";
+import { Search } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
+import learnPregnancy from "@/assets/learn-pregnancy.jpg";
+import learnFeeding from "@/assets/learn-feeding.jpg";
+import learnSleep from "@/assets/learn-sleep.jpg";
+import learnFirstAid from "@/assets/learn-firstaid.jpg";
 
 export const Route = createFileRoute("/learn")({
   component: LearnScreen,
 });
 
 const CATEGORIES = [
-  { label: "Pregnancy", Icon: BookOpen, tint: "primary" as const },
-  { label: "Feeding", Icon: GraduationCap, tint: "accent" as const },
-  { label: "Sleep", Icon: PlayCircle, tint: "primary" as const },
-  { label: "First aid", Icon: ShieldPlus, tint: "accent" as const },
+  { label: "Pregnancy", photo: learnPregnancy },
+  { label: "Feeding", photo: learnFeeding },
+  { label: "Sleep", photo: learnSleep },
+  { label: "First aid", photo: learnFirstAid },
 ];
 
 const ARTICLES = [
@@ -51,21 +55,21 @@ function LearnScreen() {
             Explore by topic
           </h3>
           <div className="grid grid-cols-2 gap-3">
-            {CATEGORIES.map(({ label, Icon, tint }) => (
+            {CATEGORIES.map(({ label, photo }) => (
               <button
                 key={label}
-                className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-[1.5rem] border border-border bg-surface p-4 text-left shadow-soft transition-transform active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-[1.5rem] border border-border bg-surface text-left shadow-soft transition-transform active:scale-[0.98]"
               >
-                <span
-                  className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${
-                    tint === "primary"
-                      ? "bg-primary-soft text-primary"
-                      : "bg-accent-soft text-accent"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                </span>
-                <span className="min-w-0 truncate font-display text-[15px] font-semibold text-ink">
+                <img
+                  src={photo}
+                  alt={label}
+                  loading="lazy"
+                  width={1024}
+                  height={1024}
+                  className="aspect-[4/3] w-full object-cover"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                <span className="absolute inset-x-0 bottom-0 p-3 font-display text-[15px] font-semibold text-white">
                   {label}
                 </span>
               </button>
