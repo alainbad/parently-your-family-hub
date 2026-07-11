@@ -9,10 +9,12 @@ export type ChatThread = {
   updated_at: string;
 };
 
+export type MessagePart = { type: string; text?: string; [key: string]: unknown };
+
 export type StoredMessage = {
   id: string;
   role: "user" | "assistant" | "system";
-  parts: unknown;
+  parts: MessagePart[];
   created_at: string;
 };
 
