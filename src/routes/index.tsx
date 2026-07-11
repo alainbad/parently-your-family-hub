@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Check } from "lucide-react";
 import { useTheme, THEME_PHOTOS, type Theme } from "@/lib/theme";
+import { useAuth } from "@/lib/auth";
 import logoNewborn from "@/assets/logo-newborn.jpg";
 
 
@@ -36,7 +38,14 @@ const OPTIONS: {
 
 function Welcome() {
   const { theme, setTheme } = useTheme();
+  const { session, loading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && session) navigate({ to: "/home", replace: true });
+  }, [loading, navigate, session]);
+
+  if (!loading && session) return null;
 
   return (
     <div className="relative flex min-h-[100dvh] w-full flex-col bg-gradient-hero">
