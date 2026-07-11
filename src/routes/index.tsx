@@ -17,19 +17,19 @@ const OPTIONS: {
   {
     id: "girl",
     title: "It's a girl",
-    hint: "Rose theme",
+    hint: "Rose & lavender theme",
     photo: THEME_PHOTOS.girl,
   },
   {
     id: "boy",
     title: "It's a boy",
-    hint: "Sky theme",
+    hint: "Sky & lavender theme",
     photo: THEME_PHOTOS.boy,
   },
   {
     id: "neutral",
     title: "We don't know yet",
-    hint: "Gentle grey theme",
+    hint: "Soft grey theme",
     photo: THEME_PHOTOS.neutral,
   },
 ];
@@ -41,7 +41,7 @@ function Welcome() {
   return (
     <div className="relative flex min-h-[100dvh] w-full flex-col bg-gradient-hero">
       <header className="safe-top flex items-center justify-between px-6 pt-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <div className="relative h-9 w-9 overflow-hidden rounded-2xl shadow-soft">
             <img
               src={logoNewborn}
@@ -54,16 +54,15 @@ function Welcome() {
             Parently
           </span>
         </div>
-
       </header>
 
       <main className="flex flex-1 flex-col px-6 pt-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
           Welcome
         </p>
-        <h1 className="mt-2 font-display text-[30px] leading-[1.1] font-medium text-ink">
+        <h1 className="mt-2 font-display text-[30px] leading-[1.1] font-semibold text-ink">
           Let's begin with your{" "}
-          <span className="italic text-accent">little one</span>.
+          <span className="text-accent">little one</span>.
         </h1>
         <p className="mt-2 text-[14.5px] leading-relaxed text-ink-soft">
           Pick what you know today — you can change this anytime.
@@ -76,7 +75,7 @@ function Welcome() {
               <button
                 key={opt.id}
                 onClick={() => setTheme(opt.id)}
-                className={`group relative overflow-hidden rounded-3xl border text-left transition-all active:scale-[0.99] ${
+                className={`group relative overflow-hidden rounded-[1.75rem] border text-left transition-all active:scale-[0.99] ${
                   active
                     ? "border-primary/50 shadow-lift ring-2 ring-primary/30"
                     : "border-border shadow-soft"
@@ -120,7 +119,7 @@ function Welcome() {
       <footer className="safe-bottom sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent px-6 pb-6 pt-4">
         <button
           onClick={() => navigate({ to: "/onboarding" })}
-          className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
+          className="inline-flex h-14 w-full items-center justify-center rounded-[1.25rem] bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
         >
           Continue
         </button>

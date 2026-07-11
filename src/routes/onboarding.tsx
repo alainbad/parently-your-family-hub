@@ -48,7 +48,7 @@ function Onboarding() {
       <header className="safe-top grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-5 pt-5">
         <Link
           to="/"
-          className="grid h-10 w-10 place-items-center rounded-full border border-border bg-surface text-ink-soft transition-colors active:bg-surface-muted"
+          className="grid h-10 w-10 place-items-center rounded-full border border-border bg-surface text-ink-soft shadow-soft transition-colors active:bg-surface-muted"
           aria-label="Back"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -58,14 +58,14 @@ function Onboarding() {
           <span className="h-1.5 w-6 rounded-full bg-border" />
           <span className="h-1.5 w-6 rounded-full bg-border" />
         </div>
-        <span className="text-sm font-medium text-ink-soft">1 / 3</span>
+        <span className="text-sm font-semibold text-ink-soft">1 / 3</span>
       </header>
 
       <main className="flex flex-1 flex-col px-6 pt-8">
-        <p className="text-sm font-medium uppercase tracking-[0.14em] text-primary">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
           Let's begin
         </p>
-        <h1 className="mt-2 font-display text-[2rem] leading-[1.1] font-medium text-ink">
+        <h1 className="mt-2 font-display text-[2rem] leading-[1.1] font-semibold text-ink">
           Where are you in your family journey?
         </h1>
         <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
@@ -79,7 +79,7 @@ function Onboarding() {
               <button
                 key={id}
                 onClick={() => setSelected(id)}
-                className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border p-4 text-left transition-all active:scale-[0.99] ${
+                className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 rounded-[1.5rem] border p-4 text-left transition-all active:scale-[0.99] ${
                   active
                     ? "border-primary/40 bg-primary-soft/60 shadow-soft"
                     : "border-border bg-surface"
@@ -118,7 +118,7 @@ function Onboarding() {
       <footer className="safe-bottom sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent px-6 pb-6 pt-4">
         <button
           onClick={() => navigate({ to: "/home" })}
-          className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
+          className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
         >
           Continue
           <ArrowRight className="h-4 w-4" />

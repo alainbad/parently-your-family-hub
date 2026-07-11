@@ -36,10 +36,10 @@ function TrackScreen() {
           {LOGS.map(({ Icon, label, value, tint }) => (
             <button
               key={label}
-              className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-3xl border border-border bg-surface p-4 text-left transition-transform active:scale-[0.98]"
+              className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-[1.5rem] border border-border bg-surface p-4 text-left shadow-soft transition-transform active:scale-[0.98]"
             >
               <span
-                className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${
+                className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${
                   tint === "primary"
                     ? "bg-primary-soft text-primary"
                     : "bg-accent-soft text-accent"
@@ -48,7 +48,7 @@ function TrackScreen() {
                 <Icon className="h-5 w-5" />
               </span>
               <span className="min-w-0">
-                <span className="block text-[12px] font-medium text-ink-soft">
+                <span className="block text-[12px] font-semibold text-ink-soft">
                   {label}
                 </span>
                 <span className="mt-0.5 block truncate font-display text-[17px] font-semibold text-ink">
@@ -64,14 +64,14 @@ function TrackScreen() {
             <h3 className="font-display text-[17px] font-semibold text-ink">
               Timeline
             </h3>
-            <span className="text-xs font-medium text-ink-soft">Today</span>
+            <span className="text-xs font-semibold text-ink-soft">Today</span>
           </div>
 
-          <div className="rounded-3xl border border-border bg-surface p-2">
+          <div className="rounded-[1.75rem] border border-border bg-surface p-2">
             {TIMELINE.map((item, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl px-3 py-3 hover:bg-surface-muted"
+                className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted"
               >
                 <span className="font-display text-[15px] font-semibold text-ink">
                   {item.time}
@@ -84,7 +84,7 @@ function TrackScreen() {
                     {item.label}
                   </span>
                 </span>
-                <button className="rounded-full border border-border px-3 py-1 text-[11px] font-medium text-ink-soft">
+                <button className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft">
                   Edit
                 </button>
               </div>
