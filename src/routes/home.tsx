@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, Check, Loader2, LogIn, Sparkles } from "lucide-react";
+import { Check, Loader2, LogIn, Sparkles, User } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { PREGNANCY_PHOTO, THEME_PHOTOS, useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
@@ -9,6 +9,7 @@ import {
   useAddQuickLog,
   type QuickLogKind,
 } from "@/lib/quick-logs";
+import { profileQuery } from "@/lib/profile";
 import quickSymptom from "@/assets/quick-symptom.jpg";
 import quickWater from "@/assets/quick-water.jpg";
 import quickMeal from "@/assets/quick-meal.jpg";
@@ -37,6 +38,7 @@ function HomeScreen() {
   const pronoun = theme === "boy" ? "His" : theme === "girl" ? "Her" : "Their";
 
   const logsQuery = useQuery(todaysLogsQuery(user?.id));
+  const profile = useQuery(profileQuery(user?.id));
   const addLog = useAddQuickLog(user?.id);
 
   const countByKind = (kind: QuickLogKind) =>
@@ -54,13 +56,21 @@ function HomeScreen() {
         })}
         right={
           user ? (
-            <button
-              aria-label="Notifications"
-              className="relative grid h-11 w-11 place-items-center rounded-full border border-border bg-surface text-ink-soft shadow-soft"
+            <Link
+              to="/profile"
+              aria-label="Profile"
+              className="relative grid h-11 w-11 place-items-center overflow-hidden rounded-full border border-border bg-surface text-ink-soft shadow-soft"
             >
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-primary" />
-            </button>
+              {profile.data?.baby_photo_url ? (
+                <img
+                  src={profile.data.baby_photo_url}
+                  alt="Baby"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <User className="h-4 w-4" />
+              )}
+            </Link>
           ) : (
             <Link
               to="/auth"
