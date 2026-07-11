@@ -24,12 +24,7 @@ const QUICK_ACTIONS = [
 ];
 
 
-const QUICK_ACTIONS = [
-  { label: "Symptom", Icon: HeartPulse, tone: "primary" as const },
-  { label: "Water", Icon: Droplet, tone: "accent" as const },
-  { label: "Meal", Icon: Salad, tone: "primary" as const },
-  { label: "Sleep", Icon: Moon, tone: "accent" as const },
-];
+
 
 function HomeScreen() {
   return (
