@@ -1,18 +1,44 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, Sparkles } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Check, Heart } from "lucide-react";
+import { useTheme, THEME_PHOTOS, type Theme } from "@/lib/theme";
 
 export const Route = createFileRoute("/")({
   component: Welcome,
 });
 
-function Welcome() {
-  return (
-    <div className="relative flex min-h-[100dvh] w-full flex-col bg-gradient-hero overflow-hidden">
-      {/* soft blobs */}
-      <div className="pointer-events-none absolute -top-24 -left-16 h-72 w-72 rounded-full bg-primary-soft opacity-60 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-16 -right-10 h-80 w-80 rounded-full bg-accent-soft opacity-70 blur-3xl" />
+const OPTIONS: {
+  id: Theme;
+  title: string;
+  hint: string;
+  photo: string;
+}[] = [
+  {
+    id: "girl",
+    title: "It's a girl",
+    hint: "Rose theme",
+    photo: THEME_PHOTOS.girl,
+  },
+  {
+    id: "boy",
+    title: "It's a boy",
+    hint: "Sky theme",
+    photo: THEME_PHOTOS.boy,
+  },
+  {
+    id: "neutral",
+    title: "We don't know yet",
+    hint: "Gentle grey theme",
+    photo: THEME_PHOTOS.neutral,
+  },
+];
 
-      <header className="safe-top relative z-10 flex items-center justify-between px-6 pt-6">
+function Welcome() {
+  const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+
+  return (
+    <div className="relative flex min-h-[100dvh] w-full flex-col bg-gradient-hero">
+      <header className="safe-top flex items-center justify-between px-6 pt-6">
         <div className="flex items-center gap-2">
           <div className="grid h-9 w-9 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
             <Heart className="h-4 w-4" fill="currentColor" />
@@ -21,48 +47,79 @@ function Welcome() {
             Parently
           </span>
         </div>
-        <Link
-          to="/home"
-          className="text-sm font-medium text-ink-soft transition-colors hover:text-ink"
-        >
-          Skip
-        </Link>
       </header>
 
-      <main className="relative z-10 flex flex-1 flex-col justify-end px-6 pb-6">
-        <div className="mb-10 flex items-center gap-2 text-sm font-medium text-primary">
-          <Sparkles className="h-4 w-4" />
-          <span>Pregnancy through age 5</span>
-        </div>
-
-        <h1 className="font-display text-[2.75rem] leading-[1.05] font-medium tracking-tight text-ink">
-          Your family's{" "}
-          <span className="italic text-accent">parenting</span> companion.
+      <main className="flex flex-1 flex-col px-6 pt-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+          Welcome
+        </p>
+        <h1 className="mt-2 font-display text-[30px] leading-[1.1] font-medium text-ink">
+          Let's begin with your{" "}
+          <span className="italic text-accent">little one</span>.
         </h1>
-        <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-ink-soft">
-          Gentle guidance, thoughtful tracking, and shared care — designed for
-          both parents from the very first week.
+        <p className="mt-2 text-[14.5px] leading-relaxed text-ink-soft">
+          Pick what you know today — you can change this anytime.
         </p>
 
-        <div className="mt-10 flex flex-col gap-3">
-          <Link
-            to="/onboarding"
-            className="inline-flex h-14 items-center justify-center rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
-          >
-            Begin your journey
-          </Link>
-          <Link
-            to="/home"
-            className="inline-flex h-14 items-center justify-center rounded-2xl border border-border bg-surface/60 text-base font-medium text-ink backdrop-blur transition-colors active:bg-surface"
-          >
-            I already have an account
-          </Link>
+        <div className="mt-6 flex flex-col gap-3">
+          {OPTIONS.map((opt) => {
+            const active = theme === opt.id;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setTheme(opt.id)}
+                className={`group relative overflow-hidden rounded-3xl border text-left transition-all active:scale-[0.99] ${
+                  active
+                    ? "border-primary/50 shadow-lift ring-2 ring-primary/30"
+                    : "border-border shadow-soft"
+                }`}
+              >
+                <div className="grid grid-cols-[112px_minmax(0,1fr)] items-stretch bg-surface">
+                  <div className="relative h-full w-28 overflow-hidden">
+                    <img
+                      src={opt.photo}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-4">
+                    <div className="min-w-0">
+                      <div className="font-display text-[17px] font-semibold text-ink">
+                        {opt.title}
+                      </div>
+                      <div className="mt-0.5 truncate text-[12.5px] text-ink-soft">
+                        {opt.hint}
+                      </div>
+                    </div>
+                    <span
+                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 transition-colors ${
+                        active
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-transparent text-transparent"
+                      }`}
+                    >
+                      <Check className="h-4 w-4" strokeWidth={2.5} />
+                    </span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
-
-        <p className="safe-bottom mt-6 text-center text-xs text-ink-soft">
-          By continuing you agree to our care & privacy principles.
-        </p>
       </main>
+
+      <footer className="safe-bottom sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent px-6 pb-6 pt-4">
+        <button
+          onClick={() => navigate({ to: "/onboarding" })}
+          className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
+        >
+          Continue
+        </button>
+        <p className="mt-3 text-center text-xs text-ink-soft">
+          You can update this later in your profile.
+        </p>
+      </footer>
     </div>
   );
 }
