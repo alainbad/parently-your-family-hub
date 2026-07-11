@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
-import type { UIMessage } from "ai";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type ChatThread = {
@@ -13,7 +12,7 @@ export type ChatThread = {
 export type StoredMessage = {
   id: string;
   role: "user" | "assistant" | "system";
-  parts: UIMessage["parts"];
+  parts: unknown;
   created_at: string;
 };
 
