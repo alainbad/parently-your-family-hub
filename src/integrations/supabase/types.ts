@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_clicks: {
+        Row: {
+          created_at: string
+          id: string
+          surface: string
+          title: string
+          url: string
+          user_id: string | null
+          vendor: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          surface: string
+          title: string
+          url: string
+          user_id?: string | null
+          vendor: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          surface?: string
+          title?: string
+          url?: string
+          user_id?: string | null
+          vendor?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
