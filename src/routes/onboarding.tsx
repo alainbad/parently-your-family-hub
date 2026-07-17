@@ -40,11 +40,17 @@ function Onboarding() {
     saveLocalStageAnswers(answers);
 
     if (user) {
-      await saveProfile.mutateAsync({
-        stage: selected,
-        due_date: selected === "pregnancy" ? dueDate || null : null,
-        birth_date: selected !== "pregnancy" ? birthDate || null : null,
-      });
+      try {
+        await saveProfile.mutateAsync({
+          stage: selected,
+          due_date: selected === "pregnancy" ? dueDate || null : null,
+          birth_date: selected !== "pregnancy" ? birthDate || null : null,
+        });
+      } catch (err) {
+        // Already cached locally above — OnboardingSync will retry the
+        // profile sync later. Don't let a failed write block onboarding.
+        console.error("[onboarding] profile sync failed", err);
+      }
     }
 
     navigate({ to: "/home" });
