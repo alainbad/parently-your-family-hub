@@ -183,7 +183,11 @@ function JourneyScreen() {
                   {m.body}
                 </div>
                 {m.picks?.length ? (
-                  <AffiliateSection title="What you might need now" picks={m.picks} />
+                  <AffiliateSection
+                    title="What you might need now"
+                    picks={m.picks}
+                    surface="journey"
+                  />
                 ) : null}
               </div>
             </article>

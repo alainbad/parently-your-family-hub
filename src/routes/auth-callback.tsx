@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth-callback")({
+  head: () => ({
+    meta: [
+      { title: "Signing you in — Parently" },
+      { name: "description", content: "Completing sign-in to Parently." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: AuthCallback,
 });
 
