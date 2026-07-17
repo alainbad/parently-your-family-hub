@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Loader2, LogIn, Sparkles, User } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
-import { AffiliateSection, type AffiliatePick } from "@/components/AffiliateCard";
+import { AffiliateSection } from "@/components/AffiliateCard";
+import { HOME_PICKS } from "@/lib/affiliate-picks";
 import { PREGNANCY_PHOTO, THEME_PHOTOS, useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
 import {
@@ -19,27 +20,6 @@ import quickSleep from "@/assets/quick-sleep.jpg";
 export const Route = createFileRoute("/home")({
   component: HomeScreen,
 });
-
-// TODO: replace `?tag=YOURTAG-20` with your Amazon Associates tag,
-// or swap in Babylist/Target affiliate URLs.
-const HOME_PICKS: AffiliatePick[] = [
-  {
-    title: "Postpartum recovery kit",
-    vendor: "Amazon",
-    price: "$32",
-    blurb: "Padsicles, peri bottle, witch hazel — first-week comfort.",
-    url: "https://www.amazon.com/s?k=postpartum+recovery+kit&tag=YOURTAG-20",
-    emoji: "💗",
-  },
-  {
-    title: "White noise machine",
-    vendor: "Amazon",
-    price: "$22",
-    blurb: "Steady sound to smooth out nap and bedtime transitions.",
-    url: "https://www.amazon.com/s?k=white+noise+machine+baby&tag=YOURTAG-20",
-    emoji: "🌙",
-  },
-];
 
 const QUICK_ACTIONS: Array<{
   kind: QuickLogKind;
