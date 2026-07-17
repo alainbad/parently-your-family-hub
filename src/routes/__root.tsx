@@ -13,8 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../lib/theme";
 import { AuthProvider } from "../lib/auth";
-
-
+import { OnboardingSync } from "../components/OnboardingSync";
 
 function NotFoundComponent() {
   return (
@@ -82,8 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       {
         name: "viewport",
-        content:
-          "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
+        content: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
       },
       { name: "theme-color", content: "#f8e8ee" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -145,6 +143,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
+          <OnboardingSync />
           {/* Required: nested routes render here. */}
           <Outlet />
         </ThemeProvider>

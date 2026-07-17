@@ -4,7 +4,8 @@ import { useRef, useState, useEffect } from "react";
 import { ArrowLeft, Camera, Check, Copy, Loader2, LogOut, User, Users } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
-import { profileQuery, useSaveProfile } from "@/lib/profile";
+import { profileQuery, useSaveProfile, type Profile } from "@/lib/profile";
+import { STAGES, type Stage } from "@/lib/baby-stage";
 import {
   acceptHouseholdInvite,
   createHouseholdInvite,
@@ -153,6 +154,8 @@ function ProfileScreen() {
           Save changes
         </button>
 
+        <StageSection userId={user.id} profile={profile} />
+
         <FamilySharingSection />
 
         <button
@@ -167,6 +170,82 @@ function ProfileScreen() {
         </button>
       </div>
     </AppShell>
+  );
+}
+
+function StageSection({
+  userId,
+  profile,
+}: {
+  userId: string;
+  profile: Profile | null | undefined;
+}) {
+  const [stage, setStage] = useState<Stage>(profile?.stage ?? "pregnancy");
+  const [dueDate, setDueDate] = useState(profile?.due_date ?? "");
+  const [birthDate, setBirthDate] = useState(profile?.birth_date ?? "");
+  const save = useSaveProfile(userId);
+
+  useEffect(() => {
+    if (profile?.stage) setStage(profile.stage);
+    setDueDate(profile?.due_date ?? "");
+    setBirthDate(profile?.birth_date ?? "");
+  }, [profile?.stage, profile?.due_date, profile?.birth_date]);
+
+  const dirty =
+    stage !== (profile?.stage ?? "pregnancy") ||
+    dueDate !== (profile?.due_date ?? "") ||
+    birthDate !== (profile?.birth_date ?? "");
+
+  const handleSave = () => {
+    save.mutate({
+      stage,
+      due_date: stage === "pregnancy" ? dueDate || null : null,
+      birth_date: stage !== "pregnancy" ? birthDate || null : null,
+    });
+  };
+
+  return (
+    <section className="rounded-[1.5rem] border border-border bg-surface p-5 shadow-soft">
+      <h3 className="font-display text-[15px] font-semibold text-ink">Your stage</h3>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {STAGES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => setStage(s.id)}
+            className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors ${
+              stage === s.id
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-surface-alt text-ink-soft"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+      <label className="mt-3 flex flex-col gap-1.5">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+          {stage === "pregnancy" ? "Expected due date" : "Baby's birth date"}
+        </span>
+        <input
+          type="date"
+          value={stage === "pregnancy" ? dueDate : birthDate}
+          onChange={(e) =>
+            stage === "pregnancy" ? setDueDate(e.target.value) : setBirthDate(e.target.value)
+          }
+          className="h-11 rounded-xl border border-border bg-surface-alt px-3 text-[14px] text-ink focus:border-primary focus:outline-none"
+        />
+      </label>
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={save.isPending || !dirty}
+        className="mt-3 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-soft disabled:opacity-50"
+      >
+        {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        Save
+      </button>
+    </section>
   );
 }
 
