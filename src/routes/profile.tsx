@@ -1,10 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useRef, useState, useEffect } from "react";
-import { ArrowLeft, Camera, Loader2, LogOut, User } from "lucide-react";
+import { ArrowLeft, Camera, Check, Copy, Loader2, LogOut, User, Users } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { profileQuery, useSaveProfile } from "@/lib/profile";
+import {
+  acceptHouseholdInvite,
+  createHouseholdInvite,
+  householdQuery,
+  leaveHousehold,
+} from "@/lib/household";
 
 export const Route = createFileRoute("/profile")({
   component: ProfileScreen,
@@ -59,7 +65,7 @@ function ProfileScreen() {
 
   const handleSave = async () => {
     await save.mutateAsync({
-      baby_name: babyName.trim() || null as unknown as string,
+      baby_name: babyName.trim() || (null as unknown as string),
       photo: pendingFile,
     });
     setPendingFile(null);
@@ -147,6 +153,8 @@ function ProfileScreen() {
           Save changes
         </button>
 
+        <FamilySharingSection />
+
         <button
           onClick={async () => {
             await signOut();
@@ -159,5 +167,137 @@ function ProfileScreen() {
         </button>
       </div>
     </AppShell>
+  );
+}
+
+function FamilySharingSection() {
+  const qc = useQueryClient();
+  const household = useQuery(householdQuery());
+  const [joinCode, setJoinCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const invite = useMutation({
+    mutationFn: () => createHouseholdInvite(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["household"] }),
+    onError: (e) => setError(e instanceof Error ? e.message : "Could not create an invite"),
+  });
+
+  const join = useMutation({
+    mutationFn: (code: string) => acceptHouseholdInvite({ data: { code } }),
+    onSuccess: () => {
+      setJoinCode("");
+      qc.invalidateQueries({ queryKey: ["household"] });
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : "Could not join with that code"),
+  });
+
+  const leave = useMutation({
+    mutationFn: () => leaveHousehold(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["household"] }),
+    onError: (e) => setError(e instanceof Error ? e.message : "Could not leave"),
+  });
+
+  const copyCode = (code: string) => {
+    navigator.clipboard?.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+
+  return (
+    <section className="rounded-[1.5rem] border border-border bg-surface p-5 shadow-soft">
+      <div className="flex items-center gap-2">
+        <Users className="h-4 w-4 text-primary" />
+        <h3 className="font-display text-[15px] font-semibold text-ink">Family</h3>
+      </div>
+
+      {household.isLoading ? (
+        <div className="mt-3 flex justify-center py-2">
+          <Loader2 className="h-4 w-4 animate-spin text-ink-soft" />
+        </div>
+      ) : household.data?.household ? (
+        <div className="mt-3 space-y-3">
+          <p className="text-[13px] text-ink-soft">
+            {household.data.members.length}{" "}
+            {household.data.members.length === 1 ? "person" : "people"} sharing logs, reminders, and
+            growth data —{" "}
+            {household.data.role === "owner" ? "you're the owner." : "you're a member."}
+          </p>
+
+          {household.data.role === "owner" ? (
+            household.data.pendingInviteCode ? (
+              <div className="flex items-center justify-between rounded-xl border border-border bg-surface-alt px-4 py-3">
+                <span className="font-mono text-[16px] font-semibold tracking-[0.2em] text-ink">
+                  {household.data.pendingInviteCode}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => copyCode(household.data!.pendingInviteCode!)}
+                  className="flex items-center gap-1 text-[12px] font-semibold text-primary"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => invite.mutate()}
+                disabled={invite.isPending}
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-[12px] font-semibold text-ink-soft disabled:opacity-60"
+              >
+                {invite.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                Get invite code
+              </button>
+            )
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => leave.mutate()}
+            disabled={leave.isPending}
+            className="text-[12px] font-semibold text-destructive disabled:opacity-60"
+          >
+            {leave.isPending ? "Leaving…" : "Leave family group"}
+          </button>
+        </div>
+      ) : (
+        <div className="mt-3 space-y-3">
+          <p className="text-[13px] text-ink-soft">
+            Invite your partner to see and log the same appointments, reminders, and growth entries.
+          </p>
+          <button
+            type="button"
+            onClick={() => invite.mutate()}
+            disabled={invite.isPending}
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground shadow-soft disabled:opacity-60"
+          >
+            {invite.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            Invite your partner
+          </button>
+
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="text"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              placeholder="Have a code? Enter it"
+              className="h-10 flex-1 rounded-full border border-border bg-surface-alt px-4 text-[13px] uppercase text-ink placeholder:text-ink-soft placeholder:normal-case focus:border-primary focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => joinCode.trim() && join.mutate(joinCode.trim())}
+              disabled={join.isPending || !joinCode.trim()}
+              className="inline-flex h-10 items-center rounded-full border border-border px-4 text-[12px] font-semibold text-ink-soft disabled:opacity-60"
+            >
+              {join.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Join"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {error ? <p className="mt-3 text-[12px] text-destructive">{error}</p> : null}
+    </section>
   );
 }
