@@ -151,6 +151,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reminders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          due_at: string
+          id: string
+          kind: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          due_at: string
+          id?: string
+          kind: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string
+          id?: string
+          kind?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
