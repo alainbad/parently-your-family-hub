@@ -6,12 +6,9 @@ import { AffiliateSection } from "@/components/AffiliateCard";
 import { HOME_PICKS } from "@/lib/affiliate-picks";
 import { PREGNANCY_PHOTO, THEME_PHOTOS, useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
-import {
-  todaysLogsQuery,
-  useAddQuickLog,
-  type QuickLogKind,
-} from "@/lib/quick-logs";
+import { todaysLogsQuery, useAddQuickLog, type QuickLogKind } from "@/lib/quick-logs";
 import { profileQuery } from "@/lib/profile";
+import { resolveStageAnswers, stageHeroLine, useLocalStageAnswers } from "@/lib/baby-stage";
 import quickSymptom from "@/assets/quick-symptom.jpg";
 import quickWater from "@/assets/quick-water.jpg";
 import quickMeal from "@/assets/quick-meal.jpg";
@@ -37,11 +34,15 @@ function HomeScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const heroPhoto = theme === "neutral" ? PREGNANCY_PHOTO : THEME_PHOTOS[theme];
-  const pronoun = theme === "boy" ? "His" : theme === "girl" ? "Her" : "Their";
 
   const logsQuery = useQuery(todaysLogsQuery(user?.id));
   const profile = useQuery(profileQuery(user?.id));
   const addLog = useAddQuickLog(user?.id);
+  const localAnswers = useLocalStageAnswers();
+  const stageAnswers = resolveStageAnswers(Boolean(user), profile.data, localAnswers);
+  const hero = stageAnswers
+    ? stageHeroLine(stageAnswers.stage, stageAnswers.dueDate, stageAnswers.birthDate)
+    : null;
 
   const countByKind = (kind: QuickLogKind) =>
     logsQuery.data?.filter((l) => l.kind === kind).length ?? 0;
@@ -95,41 +96,52 @@ function HomeScreen() {
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-90">
-              <Sparkles className="h-3.5 w-3.5" />
-              Week 24
-            </div>
-            <h2 className="mt-2 font-display text-[28px] leading-[1.05] font-semibold">
-              Baby is the size of an ear of corn.
-            </h2>
-            <p className="mt-1.5 text-[13px] leading-relaxed opacity-90">
-              {pronoun} hearing is developing this week.
-            </p>
+            {hero ? (
+              <>
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-90">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {hero.eyebrow}
+                </div>
+                <h2 className="mt-2 font-display text-[28px] leading-[1.05] font-semibold">
+                  {hero.title}
+                </h2>
+              </>
+            ) : (
+              <Link to="/onboarding" className="block">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-90">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Getting started
+                </div>
+                <h2 className="mt-2 font-display text-[24px] leading-[1.1] font-semibold">
+                  Tell us about your journey
+                </h2>
+                <p className="mt-1.5 text-[13px] leading-relaxed opacity-90">
+                  Add your due date or baby's birthday to see the right week or age here.
+                </p>
+              </Link>
+            )}
           </div>
 
-          <div className="absolute right-5 top-5 flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur-md">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
-            On track
-          </div>
+          {hero ? (
+            <div className="absolute right-5 top-5 flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur-md">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+              On track
+            </div>
+          ) : null}
         </section>
 
         {/* Bento quick actions */}
         <section className="mt-6">
           <div className="mb-3 flex items-baseline justify-between">
-            <h3 className="font-display text-[17px] font-semibold text-ink">
-              Quick log
-            </h3>
+            <h3 className="font-display text-[17px] font-semibold text-ink">Quick log</h3>
             <span className="text-xs font-semibold text-ink-soft">
-              {user
-                ? `${logsQuery.data?.length ?? 0} today`
-                : "Sign in to save"}
+              {user ? `${logsQuery.data?.length ?? 0} today` : "Sign in to save"}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {QUICK_ACTIONS.map(({ kind, label, sub, photo }) => {
               const count = countByKind(kind);
-              const pending =
-                addLog.isPending && addLog.variables?.kind === kind;
+              const pending = addLog.isPending && addLog.variables?.kind === kind;
               const content = (
                 <>
                   <div className="relative overflow-hidden rounded-[1.1rem]">
@@ -160,9 +172,7 @@ function HomeScreen() {
                       ) : null}
                     </p>
                     <p className="mt-0.5 text-[11px] text-ink-soft">
-                      {count > 0
-                        ? `${count} logged today`
-                        : sub}
+                      {count > 0 ? `${count} logged today` : sub}
                     </p>
                   </div>
                 </>

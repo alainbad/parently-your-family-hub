@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { useSaveProfile } from "@/lib/profile";
+import { STAGES, saveLocalStageAnswers, type Stage } from "@/lib/baby-stage";
 import onboardingHero from "@/assets/onboarding-hero.jpg";
 import stagePregnancy from "@/assets/stage-pregnancy.jpg";
 import stageNewborn from "@/assets/stage-newborn.jpg";
@@ -12,42 +15,40 @@ export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-const STAGES = [
-  {
-    id: "pregnancy",
-    label: "Pregnant",
-    hint: "Week by week guidance for you and baby",
-    photo: stagePregnancy,
-  },
-  {
-    id: "newborn",
-    label: "Newborn",
-    hint: "0–3 months · feeding, sleep, recovery",
-    photo: stageNewborn,
-  },
-  {
-    id: "baby",
-    label: "Baby",
-    hint: "3–12 months · milestones and first foods",
-    photo: stageBaby,
-  },
-  {
-    id: "toddler",
-    label: "Toddler",
-    hint: "1–3 years · play, language, rhythms",
-    photo: stageToddler,
-  },
-  {
-    id: "preschool",
-    label: "Preschool",
-    hint: "3–5 years · learning and emotions",
-    photo: stagePreschool,
-  },
-] as const;
+const STAGE_PHOTOS: Record<Stage, string> = {
+  pregnancy: stagePregnancy,
+  newborn: stageNewborn,
+  baby: stageBaby,
+  toddler: stageToddler,
+  preschool: stagePreschool,
+};
 
 function Onboarding() {
-  const [selected, setSelected] = useState<string>("pregnancy");
+  const [selected, setSelected] = useState<Stage>("pregnancy");
+  const [dueDate, setDueDate] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const saveProfile = useSaveProfile(user?.id);
+
+  const continueOnboarding = async () => {
+    const answers =
+      selected === "pregnancy"
+        ? { stage: selected, dueDate: dueDate || undefined }
+        : { stage: selected, birthDate: birthDate || undefined };
+
+    saveLocalStageAnswers(answers);
+
+    if (user) {
+      await saveProfile.mutateAsync({
+        stage: selected,
+        due_date: selected === "pregnancy" ? dueDate || null : null,
+        birth_date: selected !== "pregnancy" ? birthDate || null : null,
+      });
+    }
+
+    navigate({ to: "/home" });
+  };
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background">
@@ -94,7 +95,7 @@ function Onboarding() {
         </p>
 
         <div className="mt-5 flex flex-col gap-3">
-          {STAGES.map(({ id, label, hint, photo }) => {
+          {STAGES.map(({ id, label, hint }) => {
             const active = selected === id;
             return (
               <button
@@ -107,7 +108,7 @@ function Onboarding() {
                 }`}
               >
                 <img
-                  src={photo}
+                  src={STAGE_PHOTOS[id]}
                   alt={label}
                   loading="lazy"
                   width={1024}
@@ -118,9 +119,7 @@ function Onboarding() {
                   <span className="block font-display text-[16px] font-semibold text-ink">
                     {label}
                   </span>
-                  <span className="mt-0.5 block truncate text-[12px] text-ink-soft">
-                    {hint}
-                  </span>
+                  <span className="mt-0.5 block truncate text-[12px] text-ink-soft">{hint}</span>
                 </span>
                 <span
                   className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors ${
@@ -135,12 +134,31 @@ function Onboarding() {
             );
           })}
         </div>
+
+        <label className="mt-5 flex flex-col gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+            {selected === "pregnancy" ? "Expected due date" : "Baby's birth date"}
+          </span>
+          <input
+            type="date"
+            value={selected === "pregnancy" ? dueDate : birthDate}
+            onChange={(e) =>
+              selected === "pregnancy" ? setDueDate(e.target.value) : setBirthDate(e.target.value)
+            }
+            className="h-12 rounded-[1rem] border border-border bg-surface px-4 text-[14px] text-ink focus:border-primary focus:outline-none"
+          />
+          <span className="text-[12px] text-ink-soft">
+            Lets us show the right week or age everywhere — you can skip this and add it later from
+            your profile.
+          </span>
+        </label>
       </main>
 
       <footer className="safe-bottom sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent px-6 pb-6 pt-4">
         <button
-          onClick={() => navigate({ to: "/home" })}
-          className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
+          onClick={continueOnboarding}
+          disabled={saveProfile.isPending}
+          className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98] disabled:opacity-60"
         >
           Continue
           <ArrowRight className="h-4 w-4" />

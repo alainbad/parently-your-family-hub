@@ -228,22 +228,31 @@ export type Database = {
         Row: {
           baby_name: string | null
           baby_photo_url: string | null
+          birth_date: string | null
           created_at: string
+          due_date: string | null
           id: string
+          stage: string | null
           updated_at: string
         }
         Insert: {
           baby_name?: string | null
           baby_photo_url?: string | null
+          birth_date?: string | null
           created_at?: string
+          due_date?: string | null
           id: string
+          stage?: string | null
           updated_at?: string
         }
         Update: {
           baby_name?: string | null
           baby_photo_url?: string | null
+          birth_date?: string | null
           created_at?: string
+          due_date?: string | null
           id?: string
+          stage?: string | null
           updated_at?: string
         }
         Relationships: []
