@@ -103,6 +103,36 @@ export type Database = {
         }
         Relationships: []
       }
+      growth_measurements: {
+        Row: {
+          created_at: string
+          head_circumference_cm: number | null
+          height_cm: number | null
+          id: string
+          measured_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string
+          head_circumference_cm?: number | null
+          height_cm?: number | null
+          id?: string
+          measured_at: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string
+          head_circumference_cm?: number | null
+          height_cm?: number | null
+          id?: string
+          measured_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           baby_name: string | null

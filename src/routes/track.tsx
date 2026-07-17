@@ -1,12 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { Bell, Calendar, Check, Loader2, Pill, Plus, Syringe } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import {
+  Bell,
+  Calendar,
+  Check,
+  ChevronRight,
+  Loader2,
+  Pill,
+  Plus,
+  Ruler,
+  Syringe,
+} from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { AffiliateSection } from "@/components/AffiliateCard";
 import { TRACK_PICKS } from "@/lib/affiliate-picks";
 import { useAuth } from "@/lib/auth";
+import { growthMeasurementsQuery } from "@/lib/growth";
 import {
   upcomingRemindersQuery,
   useAddReminder,
@@ -113,6 +124,8 @@ function TrackScreen() {
         </section>
 
         <RemindersSection userId={user?.id} />
+
+        <GrowthSummaryCard userId={user?.id} />
 
         <AffiliateSection title="Gear that helps you track" picks={TRACK_PICKS} surface="track" />
       </div>
@@ -261,5 +274,57 @@ function AddReminderForm({ userId, onDone }: { userId: string; onDone: () => voi
         Save reminder
       </button>
     </form>
+  );
+}
+
+function GrowthSummaryCard({ userId }: { userId: string | undefined }) {
+  const measurements = useQuery(growthMeasurementsQuery(userId));
+  const latest = measurements.data?.at(-1);
+
+  return (
+    <section className="mt-7">
+      <h3 className="mb-3 font-display text-[17px] font-semibold text-ink">Growth</h3>
+
+      {!userId ? (
+        <Link
+          to="/auth"
+          className="flex items-center justify-between rounded-2xl border border-dashed border-border bg-surface/60 p-5 text-sm text-ink-soft"
+        >
+          <span>
+            <span className="font-semibold text-primary">Sign in</span> to log weight, height, and
+            head circumference.
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0" />
+        </Link>
+      ) : (
+        <Link
+          to="/growth"
+          className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-soft transition-transform active:scale-[0.99]"
+        >
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+            <Ruler className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            {latest ? (
+              <>
+                <span className="block text-[14px] font-semibold text-ink">
+                  {latest.weight_kg != null ? `${latest.weight_kg} kg` : null}
+                  {latest.weight_kg != null && latest.height_cm != null ? " · " : null}
+                  {latest.height_cm != null ? `${latest.height_cm} cm` : null}
+                </span>
+                <span className="mt-0.5 block text-[11px] text-ink-soft">
+                  Last logged {format(new Date(latest.measured_at), "MMM d, yyyy")}
+                </span>
+              </>
+            ) : (
+              <span className="block text-[13px] text-ink-soft">
+                Log your first measurement to start a chart.
+              </span>
+            )}
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0 text-ink-soft" />
+        </Link>
+      )}
+    </section>
   );
 }

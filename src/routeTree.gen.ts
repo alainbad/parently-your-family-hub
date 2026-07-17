@@ -16,6 +16,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as GrowthRouteImport } from './routes/growth'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthCallbackRouteImport } from './routes/auth-callback'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -59,6 +60,11 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GrowthRoute = GrowthRouteImport.update({
+  id: '/growth',
+  path: '/growth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/auth-callback': typeof AuthCallbackRoute
   '/chat': typeof ChatRoute
+  '/growth': typeof GrowthRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/learn': typeof LearnRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/auth-callback': typeof AuthCallbackRoute
   '/chat': typeof ChatRoute
+  '/growth': typeof GrowthRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/learn': typeof LearnRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/auth-callback': typeof AuthCallbackRoute
   '/chat': typeof ChatRoute
+  '/growth': typeof GrowthRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/learn': typeof LearnRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/auth-callback'
     | '/chat'
+    | '/growth'
     | '/home'
     | '/journey'
     | '/learn'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/auth-callback'
     | '/chat'
+    | '/growth'
     | '/home'
     | '/journey'
     | '/learn'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/auth-callback'
     | '/chat'
+    | '/growth'
     | '/home'
     | '/journey'
     | '/learn'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   ChatRoute: typeof ChatRoute
+  GrowthRoute: typeof GrowthRoute
   HomeRoute: typeof HomeRoute
   JourneyRoute: typeof JourneyRoute
   LearnRoute: typeof LearnRoute
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/growth': {
+      id: '/growth'
+      path: '/growth'
+      fullPath: '/growth'
+      preLoaderRoute: typeof GrowthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
@@ -320,6 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   ChatRoute: ChatRoute,
+  GrowthRoute: GrowthRoute,
   HomeRoute: HomeRoute,
   JourneyRoute: JourneyRoute,
   LearnRoute: LearnRoute,
