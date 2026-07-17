@@ -245,6 +245,11 @@ function StageSection({
         {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         Save
       </button>
+      {save.isError ? (
+        <p className="mt-2 text-[12px] text-destructive">
+          {save.error instanceof Error ? save.error.message : "Could not save. Try again."}
+        </p>
+      ) : null}
     </section>
   );
 }
