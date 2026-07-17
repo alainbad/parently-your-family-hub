@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, Home, LineChart, Sparkles, User } from "lucide-react";
+import { BookOpen, Home, LineChart, Milestone, Sparkles, User } from "lucide-react";
 
 const LEFT_TABS = [
   { to: "/home", label: "Home", Icon: Home },
   { to: "/track", label: "Track", Icon: LineChart },
+  { to: "/journey", label: "Journey", Icon: Milestone },
 ] as const;
 
 const RIGHT_TABS = [
@@ -41,7 +42,7 @@ export function BottomNav() {
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 safe-bottom">
       <div className="pointer-events-auto relative mx-auto max-w-md px-5 pb-5 pt-2">
-        <div className="grid grid-cols-5 items-center rounded-[2rem] border border-border bg-surface/95 px-2 py-2 shadow-soft backdrop-blur">
+        <div className="grid grid-cols-6 items-center rounded-[2rem] border border-border bg-surface/95 px-2 py-2 shadow-soft backdrop-blur">
           {LEFT_TABS.map(({ to, label, Icon }) => (
             <NavLink
               key={to}
