@@ -108,6 +108,25 @@ export const JOURNEY_PICKS_BY_WEEK: Record<string, AffiliatePick[]> = {
   ],
 };
 
+export const FIRSTCRY_PICKS: AffiliatePick[] = [
+  {
+    title: "Newborn grooming kit",
+    vendor: "FirstCry",
+    price: "$19",
+    blurb: "Nail clipper, brush, thermometer case — pediatrician-approved basics.",
+    url: "https://www.firstcry.com/search?q=newborn+grooming+kit&ref=YOURFIRSTCRYREF",
+    emoji: "🧴",
+  },
+  {
+    title: "Baby feeding bottle set",
+    vendor: "FirstCry",
+    price: "$24",
+    blurb: "BPA-free bottles with anti-colic vents, in multiple flow rates.",
+    url: "https://www.firstcry.com/search?q=baby+feeding+bottle+set&ref=YOURFIRSTCRYREF",
+    emoji: "🍼",
+  },
+];
+
 export type ShopSection = {
   id: string;
   title: string;
@@ -123,7 +142,7 @@ export const SHOP_SECTIONS: ShopSection[] = [
   {
     id: "hospital-bag",
     title: "Hospital bag & newborn",
-    picks: JOURNEY_PICKS_BY_WEEK["Week 32"],
+    picks: [...JOURNEY_PICKS_BY_WEEK["Week 32"], FIRSTCRY_PICKS[0]],
   },
   {
     id: "postpartum",
@@ -140,7 +159,7 @@ export const SHOP_SECTIONS: ShopSection[] = [
   {
     id: "health-tracking",
     title: "Health & tracking gear",
-    picks: TRACK_PICKS,
+    picks: [...TRACK_PICKS, FIRSTCRY_PICKS[1]],
   },
   {
     id: "planning",
