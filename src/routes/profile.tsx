@@ -6,6 +6,7 @@ import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { profileQuery, useSaveProfile, type Profile } from "@/lib/profile";
 import { STAGES, type Stage } from "@/lib/baby-stage";
+import { getErrorMessage } from "@/lib/errors";
 import {
   acceptHouseholdInvite,
   createHouseholdInvite,
@@ -247,7 +248,7 @@ function StageSection({
       </button>
       {save.isError ? (
         <p className="mt-2 text-[12px] text-destructive">
-          {save.error instanceof Error ? save.error.message : "Could not save. Try again."}
+          {getErrorMessage(save.error, "Could not save. Try again.")}
         </p>
       ) : null}
     </section>
@@ -264,7 +265,7 @@ function FamilySharingSection() {
   const invite = useMutation({
     mutationFn: () => createHouseholdInvite(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["household"] }),
-    onError: (e) => setError(e instanceof Error ? e.message : "Could not create an invite"),
+    onError: (e) => setError(getErrorMessage(e, "Could not create an invite")),
   });
 
   const join = useMutation({
@@ -273,13 +274,13 @@ function FamilySharingSection() {
       setJoinCode("");
       qc.invalidateQueries({ queryKey: ["household"] });
     },
-    onError: (e) => setError(e instanceof Error ? e.message : "Could not join with that code"),
+    onError: (e) => setError(getErrorMessage(e, "Could not join with that code")),
   });
 
   const leave = useMutation({
     mutationFn: () => leaveHousehold(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["household"] }),
-    onError: (e) => setError(e instanceof Error ? e.message : "Could not leave"),
+    onError: (e) => setError(getErrorMessage(e, "Could not leave")),
   });
 
   const copyCode = (code: string) => {
