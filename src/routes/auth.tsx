@@ -9,6 +9,17 @@ export const Route = createFileRoute("/auth")({
   component: AuthScreen,
 });
 
+const GOOGLE_SIGN_IN_TIMEOUT_MS = 25_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]);
+}
+
 function AuthScreen() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -49,10 +60,14 @@ function AuthScreen() {
     setBusy(true);
     setError(null);
     try {
-      const res = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth-callback`,
-        extraParams: { prompt: "select_account" },
-      });
+      const res = await withTimeout(
+        lovable.auth.signInWithOAuth("google", {
+          redirect_uri: `${window.location.origin}/auth-callback`,
+          extraParams: { prompt: "select_account" },
+        }),
+        GOOGLE_SIGN_IN_TIMEOUT_MS,
+        "Google sign-in is taking too long. If you're inside an in-app preview, open this page in your phone's browser instead.",
+      );
 
       if (res.redirected) return;
       if (res.error) throw res.error;
