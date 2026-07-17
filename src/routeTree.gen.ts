@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LearnRouteImport } from './routes/learn'
@@ -26,6 +27,11 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/learn': typeof LearnRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/learn': typeof LearnRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/learn': typeof LearnRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/learn'
     | '/onboarding'
     | '/profile'
+    | '/shop'
     | '/track'
     | '/api/chat'
     | '/nurture/$threadId'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/learn'
     | '/onboarding'
     | '/profile'
+    | '/shop'
     | '/track'
     | '/api/chat'
     | '/nurture/$threadId'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/learn'
     | '/onboarding'
     | '/profile'
+    | '/shop'
     | '/track'
     | '/api/chat'
     | '/nurture/$threadId'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   LearnRoute: typeof LearnRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
+  ShopRoute: typeof ShopRoute
   TrackRoute: typeof TrackRoute
   ApiChatRoute: typeof ApiChatRoute
   NurtureThreadIdRoute: typeof NurtureThreadIdRoute
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -305,6 +325,7 @@ const rootRouteChildren: RootRouteChildren = {
   LearnRoute: LearnRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
+  ShopRoute: ShopRoute,
   TrackRoute: TrackRoute,
   ApiChatRoute: ApiChatRoute,
   NurtureThreadIdRoute: NurtureThreadIdRoute,

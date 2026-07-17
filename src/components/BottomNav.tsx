@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, Home, LineChart, Milestone, Sparkles, User } from "lucide-react";
+import { BookOpen, Home, LineChart, Milestone, ShoppingBag, Sparkles, User } from "lucide-react";
 
 const LEFT_TABS = [
   { to: "/home", label: "Home", Icon: Home },
@@ -9,6 +9,7 @@ const LEFT_TABS = [
 
 const RIGHT_TABS = [
   { to: "/learn", label: "Learn", Icon: BookOpen },
+  { to: "/shop", label: "Shop", Icon: ShoppingBag },
   { to: "/profile", label: "Profile", Icon: User },
 ] as const;
 

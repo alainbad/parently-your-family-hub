@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
-import { AffiliateSection, type AffiliatePick } from "@/components/AffiliateCard";
+import { AffiliateSection } from "@/components/AffiliateCard";
+import { TRACK_PICKS } from "@/lib/affiliate-picks";
 import trackFeeding from "@/assets/track-feeding.jpg";
 import trackSleep from "@/assets/track-sleep.jpg";
 import trackDiapers from "@/assets/track-diapers.jpg";
@@ -11,27 +12,6 @@ import trackTemperature from "@/assets/track-temperature.jpg";
 export const Route = createFileRoute("/track")({
   component: TrackScreen,
 });
-
-// TODO: replace `?tag=YOURTAG-20` with your Amazon Associates tag,
-// or swap in Babylist/Target affiliate URLs.
-const TRACK_PICKS: AffiliatePick[] = [
-  {
-    title: "Digital baby thermometer",
-    vendor: "Amazon",
-    price: "$16",
-    blurb: "Fast, accurate reads for those middle-of-the-night checks.",
-    url: "https://www.amazon.com/s?k=digital+baby+thermometer&tag=YOURTAG-20",
-    emoji: "🌡️",
-  },
-  {
-    title: "Wearable breast pump",
-    vendor: "Amazon",
-    price: "$149",
-    blurb: "Hands-free pumping that fits inside your normal bra.",
-    url: "https://www.amazon.com/s?k=wearable+breast+pump&tag=YOURTAG-20",
-    emoji: "🍼",
-  },
-];
 
 const LOGS = [
   { photo: trackFeeding, label: "Feeding", value: "6 today" },
