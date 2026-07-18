@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { restoreOAuthSessionFromUrl } from "@/lib/auth-redirect";
 
 export const Route = createFileRoute("/auth-callback")({
   head: () => ({
@@ -22,55 +22,15 @@ function AuthCallback() {
     let cancelled = false;
 
     async function finishSignIn() {
-      const hashParams = new URLSearchParams(window.location.hash.slice(1));
-      const searchParams = new URLSearchParams(window.location.search);
-      const urlError =
-        hashParams.get("error_description") ?? searchParams.get("error_description");
-      if (urlError) {
-        setError(urlError);
+      const restored = await restoreOAuthSessionFromUrl();
+      if (cancelled) return;
+      if (restored.error) {
+        setError(restored.error);
         return;
       }
-
-      const accessToken = hashParams.get("access_token");
-      const refreshToken = hashParams.get("refresh_token");
-      if (accessToken && refreshToken) {
-        const { error: setSessionError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        if (cancelled) return;
-        if (setSessionError) {
-          setError(setSessionError.message);
-          return;
-        }
+      if (restored.session) {
         navigate({ to: "/home", replace: true });
         return;
-      }
-
-      const code = searchParams.get("code");
-      if (code) {
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-        if (cancelled) return;
-        if (exchangeError) {
-          setError(exchangeError.message);
-          return;
-        }
-        navigate({ to: "/home", replace: true });
-        return;
-      }
-
-      for (let attempt = 0; attempt < 12; attempt += 1) {
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        if (cancelled) return;
-        if (sessionError) {
-          setError(sessionError.message);
-          return;
-        }
-        if (data.session) {
-          navigate({ to: "/home", replace: true });
-          return;
-        }
-        await new Promise((resolve) => window.setTimeout(resolve, 250));
       }
 
       if (!cancelled) {
