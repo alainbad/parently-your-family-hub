@@ -62,7 +62,7 @@ function AuthScreen() {
     try {
       const res = await withTimeout(
         lovable.auth.signInWithOAuth("google", {
-          redirect_uri: `${window.location.origin}/auth-callback`,
+          redirect_uri: window.location.origin,
           extraParams: { prompt: "select_account" },
         }),
         GOOGLE_SIGN_IN_TIMEOUT_MS,
