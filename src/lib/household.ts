@@ -120,10 +120,36 @@ export const acceptHouseholdInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ code: z.string().min(4) }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("redeem_household_invite", {
-      invite_code: data.code,
-    });
-    if (error) throw new Error(error.message);
+    const inviteCode = data.code.trim().toUpperCase();
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: invite, error: inviteError } = await supabaseAdmin
+      .from("household_invites")
+      .select("id, household_id, accepted_at, expires_at")
+      .eq("code", inviteCode)
+      .maybeSingle();
+
+    if (inviteError) throw new Error(inviteError.message);
+    if (!invite || invite.accepted_at || new Date(invite.expires_at).getTime() <= Date.now()) {
+      throw new Error("Invite code is invalid or expired");
+    }
+
+    const { error: memberError } = await supabaseAdmin.from("household_members").upsert(
+      {
+        household_id: invite.household_id,
+        user_id: context.userId,
+        role: "member",
+      },
+      { onConflict: "household_id,user_id" },
+    );
+    if (memberError) throw new Error(memberError.message);
+
+    const { error: updateError } = await supabaseAdmin
+      .from("household_invites")
+      .update({ accepted_by: context.userId, accepted_at: new Date().toISOString() })
+      .eq("id", invite.id);
+    if (updateError) throw new Error(updateError.message);
+
     return { ok: true };
   });
 
