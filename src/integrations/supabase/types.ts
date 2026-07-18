@@ -289,10 +289,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      redeem_household_invite: {
-        Args: { invite_code: string }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
