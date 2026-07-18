@@ -7,6 +7,7 @@ type AuthContextValue = {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isReady: boolean;
   signOut: () => Promise<void>;
 };
 
@@ -14,14 +15,11 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
-      setSession(s);
-    });
+    let unsubscribe: (() => void) | undefined;
 
     async function hydrateSession() {
       const restored = await restoreOAuthSessionFromUrl();
@@ -33,30 +31,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (restored.session) {
         setSession(restored.session);
-        setLoading(false);
-        return;
+      } else {
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+        setSession(data.session);
       }
 
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setSession(data.session);
-      setLoading(false);
+      const { data: sub } = supabase.auth.onAuthStateChange((event, nextSession) => {
+        if (event === "INITIAL_SESSION") return;
+        setSession(nextSession);
+      });
+      unsubscribe = () => sub.subscription.unsubscribe();
+      setIsReady(true);
     }
 
     void hydrateSession();
 
     return () => {
       mounted = false;
-      sub.subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
   const value: AuthContextValue = {
     session,
     user: session?.user ?? null,
-    loading,
+    loading: !isReady,
+    isReady,
     signOut: async () => {
       await supabase.auth.signOut();
+      setSession(null);
     },
   };
 
@@ -67,4 +71,8 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
+}
+
+export function useAuthReady() {
+  return useAuth();
 }
