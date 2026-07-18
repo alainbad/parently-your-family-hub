@@ -184,7 +184,7 @@ export type Database = {
         Insert: {
           household_id: string
           joined_at?: string
-          role?: string
+          role: string
           user_id: string
         }
         Update: {
@@ -209,18 +209,21 @@ export type Database = {
           id: string
           name: string
           owner_id: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string
           owner_id: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           owner_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -316,10 +319,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      redeem_household_invite: {
-        Args: { invite_code: string }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
