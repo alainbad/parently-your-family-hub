@@ -13,10 +13,11 @@ function AuthScreen() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState<"google" | "email" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { session, loading } = useAuth();
+  const busy = busyAction !== null;
 
   useEffect(() => {
     if (!loading && session) navigate({ to: "/home" });
@@ -24,7 +25,7 @@ function AuthScreen() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
+    setBusyAction("email");
     setError(null);
     try {
       if (mode === "signup") {
@@ -41,16 +42,22 @@ function AuthScreen() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
   const google = async () => {
-    setBusy(true);
+    setBusyAction("google");
     setError(null);
     try {
+      if (isEmbeddedPreview()) {
+        await signInWithGooglePopupFallback();
+        navigate({ to: "/home", replace: true });
+        return;
+      }
+
       const res = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth-callback`,
         extraParams: { prompt: "select_account" },
       });
 
@@ -64,7 +71,7 @@ function AuthScreen() {
       navigate({ to: "/home", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Google sign-in failed");
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
@@ -96,7 +103,7 @@ function AuthScreen() {
           disabled={busy}
           className="mt-7 inline-flex h-12 w-full items-center justify-center gap-3 rounded-[1rem] border border-border bg-surface text-[14px] font-semibold text-ink shadow-soft transition-transform active:scale-[0.99]"
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
+          {busyAction === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
           Continue with Google
         </button>
 
@@ -142,7 +149,7 @@ function AuthScreen() {
             disabled={busy}
             className="mt-2 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98] disabled:opacity-60"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {busyAction === "email" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {mode === "signin" ? "Sign in" : "Create account"}
           </button>
         </form>
@@ -157,6 +164,69 @@ function AuthScreen() {
       </main>
     </div>
   );
+}
+
+function isEmbeddedPreview() {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+}
+
+async function signInWithGooglePopupFallback() {
+  const authUrl = new URL("/~oauth/initiate", window.location.origin);
+  authUrl.searchParams.set("provider", "google");
+  authUrl.searchParams.set("redirect_uri", `${window.location.origin}/auth-callback`);
+  authUrl.searchParams.set("state", createOAuthState());
+  authUrl.searchParams.set("prompt", "select_account");
+
+  const popup = window.open(authUrl.toString(), "_blank");
+  if (!popup) {
+    throw new Error("The Google sign-in window was blocked. Open the preview in a new tab and try again.");
+  }
+
+  const session = await waitForPopupSession(popup);
+  if (!session) {
+    throw new Error("Google sign-in did not finish. Close the Google tab and try again.");
+  }
+}
+
+async function waitForPopupSession(popup: Window) {
+  const started = Date.now();
+  const timeoutMs = 120_000;
+
+  while (Date.now() - started < timeoutMs) {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    if (data.session) return data.session;
+
+    if (popup.closed) {
+      const closedCheck = await supabase.auth.getSession();
+      if (closedCheck.error) throw closedCheck.error;
+      return closedCheck.data.session;
+    }
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+  }
+
+  try {
+    popup.close();
+  } catch {
+    // Ignore: the user may have already closed it.
+  }
+  return null;
+}
+
+function createOAuthState() {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
 }
 
 function GoogleIcon() {
