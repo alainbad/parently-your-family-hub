@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { restoreOAuthSessionFromUrl } from "@/lib/auth-redirect";
 
 export const Route = createFileRoute("/auth-callback")({
@@ -29,6 +30,17 @@ function AuthCallback() {
         return;
       }
       if (restored.session) {
+        navigate({ to: "/home", replace: true });
+        return;
+      }
+
+      const { data, error } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      if (data.session) {
         navigate({ to: "/home", replace: true });
         return;
       }
