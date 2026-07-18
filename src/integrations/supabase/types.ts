@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_clicks: {
+        Row: {
+          created_at: string
+          id: string
+          surface: string
+          title: string
+          url: string
+          user_id: string | null
+          vendor: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          surface: string
+          title: string
+          url: string
+          user_id?: string | null
+          vendor: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          surface?: string
+          title?: string
+          url?: string
+          user_id?: string | null
+          vendor?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -73,26 +103,159 @@ export type Database = {
         }
         Relationships: []
       }
+      growth_measurements: {
+        Row: {
+          created_at: string
+          head_circumference_cm: number | null
+          height_cm: number | null
+          id: string
+          measured_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string
+          head_circumference_cm?: number | null
+          height_cm?: number | null
+          id?: string
+          measured_at: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string
+          head_circumference_cm?: number | null
+          height_cm?: number | null
+          id?: string
+          measured_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      household_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          household_id: string
+          id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          household_id: string
+          id?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          household_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_invites_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_members: {
+        Row: {
+          household_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          household_id: string
+          joined_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          household_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_members_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      households: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           baby_name: string | null
           baby_photo_url: string | null
+          birth_date: string | null
           created_at: string
+          due_date: string | null
           id: string
+          stage: string | null
           updated_at: string
         }
         Insert: {
           baby_name?: string | null
           baby_photo_url?: string | null
+          birth_date?: string | null
           created_at?: string
+          due_date?: string | null
           id: string
+          stage?: string | null
           updated_at?: string
         }
         Update: {
           baby_name?: string | null
           baby_photo_url?: string | null
+          birth_date?: string | null
           created_at?: string
+          due_date?: string | null
           id?: string
+          stage?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -126,7 +289,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      redeem_household_invite: {
+        Args: { invite_code: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
