@@ -49,8 +49,13 @@ function AuthScreen() {
     setBusy(true);
     setError(null);
     try {
+      if (shouldUseFullPageOAuth()) {
+        startFullPageGoogleOAuth();
+        return;
+      }
+
       const res = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth-callback`,
         extraParams: { prompt: "select_account" },
       });
 
@@ -157,6 +162,38 @@ function AuthScreen() {
       </main>
     </div>
   );
+}
+
+function shouldUseFullPageOAuth() {
+  if (typeof window === "undefined") return false;
+  const isFramed = window.self !== window.top;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
+  const isLocalPreview = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  return isFramed && isMobile && !isLocalPreview;
+}
+
+function startFullPageGoogleOAuth() {
+  const authUrl = new URL("/~oauth/initiate", window.location.origin);
+  authUrl.searchParams.set("provider", "google");
+  authUrl.searchParams.set("redirect_uri", `${window.location.origin}/auth-callback`);
+  authUrl.searchParams.set("state", createOAuthState());
+  authUrl.searchParams.set("prompt", "select_account");
+
+  try {
+    window.top?.location.assign(authUrl.toString());
+  } catch {
+    window.location.assign(authUrl.toString());
+  }
+}
+
+function createOAuthState() {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
 }
 
 function GoogleIcon() {
