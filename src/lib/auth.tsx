@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { restoreOAuthSessionFromUrl } from "@/lib/auth-redirect";
 
 type AuthContextValue = {
   session: Session | null;
@@ -16,14 +17,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
       setSession(s);
     });
-    supabase.auth.getSession().then(({ data }) => {
+
+    async function hydrateSession() {
+      const restored = await restoreOAuthSessionFromUrl();
+      if (!mounted) return;
+
+      if (restored.error) {
+        console.error("[auth] OAuth session restore failed", restored.error);
+      }
+
+      if (restored.session) {
+        setSession(restored.session);
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (!mounted) return;
       setSession(data.session);
       setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
+    }
+
+    void hydrateSession();
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const value: AuthContextValue = {
