@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Check, Loader2, LogIn, Sparkles, User } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { AffiliateSection } from "@/components/AffiliateCard";
@@ -7,6 +8,7 @@ import { HOME_PICKS } from "@/lib/affiliate-picks";
 import { PREGNANCY_PHOTO, THEME_PHOTOS, useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
 import { todaysLogsQuery, useAddQuickLog, type QuickLogKind } from "@/lib/quick-logs";
+import { getErrorMessage } from "@/lib/errors";
 import { profileQuery } from "@/lib/profile";
 import { resolveStageAnswers, stageHeroLine, useLocalStageAnswers } from "@/lib/baby-stage";
 import quickSymptom from "@/assets/quick-symptom.jpg";
@@ -193,7 +195,15 @@ function HomeScreen() {
                 <button
                   key={kind}
                   disabled={addLog.isPending}
-                  onClick={() => addLog.mutate({ kind })}
+                  onClick={() =>
+                    addLog.mutate(
+                      { kind },
+                      {
+                        onError: (err) =>
+                          toast.error(getErrorMessage(err, "Could not save that log")),
+                      },
+                    )
+                  }
                   className={baseClass}
                 >
                   {content}
