@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 import {
   Bell,
   Calendar,
@@ -24,6 +25,7 @@ import {
   useDeleteBabyLog,
   type BabyLogKind,
 } from "@/lib/baby-logs";
+import { getErrorMessage } from "@/lib/errors";
 import { growthMeasurementsQuery } from "@/lib/growth";
 import { QUICK_LOG_LABELS, todaysLogsQuery, useDeleteQuickLog } from "@/lib/quick-logs";
 import {
@@ -126,7 +128,15 @@ function TrackScreen() {
               <button
                 key={kind}
                 disabled={addBabyLog.isPending}
-                onClick={() => addBabyLog.mutate({ kind })}
+                onClick={() =>
+                  addBabyLog.mutate(
+                    { kind },
+                    {
+                      onError: (err) =>
+                        toast.error(getErrorMessage(err, "Could not save that log")),
+                    },
+                  )
+                }
                 className={baseClass}
               >
                 {content}
@@ -226,11 +236,15 @@ function TimelineSection({ userId }: { userId: string | undefined }) {
               <button
                 type="button"
                 disabled={deleteLog.isPending || deleteBabyLog.isPending}
-                onClick={() =>
-                  entry.source === "quick"
-                    ? deleteLog.mutate(entry.id)
-                    : deleteBabyLog.mutate(entry.id)
-                }
+                onClick={() => {
+                  const onError = (err: unknown) =>
+                    toast.error(getErrorMessage(err, "Could not delete that entry"));
+                  if (entry.source === "quick") {
+                    deleteLog.mutate(entry.id, { onError });
+                  } else {
+                    deleteBabyLog.mutate(entry.id, { onError });
+                  }
+                }}
                 className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft disabled:opacity-50"
               >
                 Delete
