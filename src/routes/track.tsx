@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import {
   Bell,
@@ -17,6 +17,13 @@ import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { AffiliateSection } from "@/components/AffiliateCard";
 import { TRACK_PICKS } from "@/lib/affiliate-picks";
 import { useAuth } from "@/lib/auth";
+import {
+  BABY_LOG_LABELS,
+  todaysBabyLogsQuery,
+  useAddBabyLog,
+  useDeleteBabyLog,
+  type BabyLogKind,
+} from "@/lib/baby-logs";
 import { growthMeasurementsQuery } from "@/lib/growth";
 import { QUICK_LOG_LABELS, todaysLogsQuery, useDeleteQuickLog } from "@/lib/quick-logs";
 import {
@@ -47,17 +54,22 @@ function reminderIcon(kind: ReminderKind) {
   return REMINDER_KINDS.find((k) => k.value === kind)?.Icon ?? Bell;
 }
 
-const LOGS = [
-  { photo: trackFeeding, label: "Feeding", value: "6 today" },
-  { photo: trackSleep, label: "Sleep", value: "12h 40m" },
-  { photo: trackDiapers, label: "Diapers", value: "8 today" },
-  { photo: trackPumping, label: "Pumping", value: "120 ml" },
-  { photo: trackMedicine, label: "Medicine", value: "1 dose" },
-  { photo: trackTemperature, label: "Temperature", value: "36.8°C" },
+const BABY_LOG_TILES: { kind: BabyLogKind; label: string; sub: string; photo: string }[] = [
+  { kind: "feeding", label: "Feeding", sub: "Log a feed", photo: trackFeeding },
+  { kind: "sleep", label: "Sleep", sub: "Log a rest", photo: trackSleep },
+  { kind: "diaper", label: "Diapers", sub: "Log a change", photo: trackDiapers },
+  { kind: "pumping", label: "Pumping", sub: "Log a session", photo: trackPumping },
+  { kind: "medicine", label: "Medicine", sub: "Log a dose", photo: trackMedicine },
+  { kind: "temperature", label: "Temperature", sub: "Log a reading", photo: trackTemperature },
 ];
 
 function TrackScreen() {
   const { user } = useAuth();
+  const babyLogsQuery = useQuery(todaysBabyLogsQuery(user?.id));
+  const addBabyLog = useAddBabyLog(user?.id);
+
+  const countByKind = (kind: BabyLogKind) =>
+    babyLogsQuery.data?.filter((l) => l.kind === kind).length ?? 0;
 
   return (
     <AppShell>
@@ -65,29 +77,62 @@ function TrackScreen() {
 
       <div className="px-6">
         <div className="grid grid-cols-2 gap-3">
-          {LOGS.map(({ photo, label, value }) => (
-            <button
-              key={label}
-              className="flex flex-col gap-4 overflow-hidden rounded-[1.5rem] border border-border bg-surface p-3 text-left shadow-soft transition-transform active:scale-[0.98]"
-            >
-              <div className="overflow-hidden rounded-[1.1rem]">
-                <img
-                  src={photo}
-                  alt={label}
-                  loading="lazy"
-                  width={1024}
-                  height={1024}
-                  className="aspect-square w-full object-cover"
-                />
-              </div>
-              <div className="min-w-0 px-2 pb-1">
-                <p className="text-[12px] font-semibold text-ink-soft">{label}</p>
-                <p className="mt-0.5 truncate font-display text-[17px] font-semibold text-ink">
-                  {value}
-                </p>
-              </div>
-            </button>
-          ))}
+          {BABY_LOG_TILES.map(({ kind, label, sub, photo }) => {
+            const count = countByKind(kind);
+            const pending = addBabyLog.isPending && addBabyLog.variables?.kind === kind;
+            const content = (
+              <>
+                <div className="relative overflow-hidden rounded-[1.1rem]">
+                  <img
+                    src={photo}
+                    alt={label}
+                    loading="lazy"
+                    width={1024}
+                    height={1024}
+                    className="aspect-square w-full object-cover"
+                  />
+                  {count > 0 ? (
+                    <span className="absolute right-2 top-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-primary px-2 text-[11px] font-bold text-primary-foreground shadow-soft">
+                      {count}
+                    </span>
+                  ) : null}
+                  {pending ? (
+                    <span className="absolute inset-0 grid place-items-center bg-black/20">
+                      <Loader2 className="h-5 w-5 animate-spin text-white" />
+                    </span>
+                  ) : null}
+                </div>
+                <div className="min-w-0 px-2 pb-1">
+                  <p className="text-[12px] font-semibold text-ink-soft">{label}</p>
+                  <p className="mt-0.5 truncate font-display text-[17px] font-semibold text-ink">
+                    {count > 0 ? `${count} today` : sub}
+                  </p>
+                </div>
+              </>
+            );
+
+            const baseClass =
+              "flex flex-col gap-4 overflow-hidden rounded-[1.5rem] border border-border bg-surface p-3 text-left shadow-soft transition-transform active:scale-[0.98] disabled:opacity-70";
+
+            if (!user) {
+              return (
+                <Link key={kind} to="/auth" className={baseClass}>
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={kind}
+                disabled={addBabyLog.isPending}
+                onClick={() => addBabyLog.mutate({ kind })}
+                className={baseClass}
+              >
+                {content}
+              </button>
+            );
+          })}
         </div>
 
         <TimelineSection userId={user?.id} />
@@ -102,9 +147,41 @@ function TrackScreen() {
   );
 }
 
+type TimelineEntry = {
+  id: string;
+  created_at: string;
+  kindLabel: string;
+  description: string;
+  source: "quick" | "baby";
+};
+
 function TimelineSection({ userId }: { userId: string | undefined }) {
   const logsQuery = useQuery(todaysLogsQuery(userId));
+  const babyLogsQuery = useQuery(todaysBabyLogsQuery(userId));
   const deleteLog = useDeleteQuickLog(userId);
+  const deleteBabyLog = useDeleteBabyLog(userId);
+
+  const entries = useMemo<TimelineEntry[]>(() => {
+    const quick = (logsQuery.data ?? []).map((log) => ({
+      id: log.id,
+      created_at: log.created_at,
+      kindLabel: log.kind,
+      description: log.value ?? QUICK_LOG_LABELS[log.kind],
+      source: "quick" as const,
+    }));
+    const baby = (babyLogsQuery.data ?? []).map((log) => ({
+      id: log.id,
+      created_at: log.created_at,
+      kindLabel: log.kind,
+      description: log.value ?? BABY_LOG_LABELS[log.kind],
+      source: "baby" as const,
+    }));
+    return [...quick, ...baby].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+  }, [logsQuery.data, babyLogsQuery.data]);
+
+  const isLoading = logsQuery.isLoading || babyLogsQuery.isLoading;
 
   return (
     <section className="mt-7">
@@ -118,38 +195,42 @@ function TimelineSection({ userId }: { userId: string | undefined }) {
           <Link to="/auth" className="font-semibold text-primary">
             Sign in
           </Link>{" "}
-          to see your logged symptoms, water, meals, and sleep here.
+          to see everything you've logged today, in one place.
         </div>
-      ) : logsQuery.isLoading ? (
+      ) : isLoading ? (
         <div className="flex justify-center py-4">
           <Loader2 className="h-5 w-5 animate-spin text-ink-soft" />
         </div>
-      ) : logsQuery.data?.length === 0 ? (
+      ) : entries.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-surface/60 p-5 text-center text-sm text-ink-soft">
-          Nothing logged yet today — tap a Quick log tile on Home to add one.
+          Nothing logged yet today — tap a tile above or on Home to add one.
         </div>
       ) : (
         <div className="rounded-[1.75rem] border border-border bg-surface p-2">
-          {logsQuery.data?.map((log) => (
+          {entries.map((entry) => (
             <div
-              key={log.id}
+              key={`${entry.source}-${entry.id}`}
               className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted"
             >
               <span className="font-display text-[15px] font-semibold text-ink">
-                {format(new Date(log.created_at), "HH:mm")}
+                {format(new Date(entry.created_at), "HH:mm")}
               </span>
               <span className="min-w-0">
                 <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary">
-                  {log.kind}
+                  {entry.kindLabel}
                 </span>
                 <span className="mt-0.5 block truncate text-[14px] text-ink">
-                  {log.value ?? QUICK_LOG_LABELS[log.kind]}
+                  {entry.description}
                 </span>
               </span>
               <button
                 type="button"
-                disabled={deleteLog.isPending}
-                onClick={() => deleteLog.mutate(log.id)}
+                disabled={deleteLog.isPending || deleteBabyLog.isPending}
+                onClick={() =>
+                  entry.source === "quick"
+                    ? deleteLog.mutate(entry.id)
+                    : deleteBabyLog.mutate(entry.id)
+                }
                 className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft disabled:opacity-50"
               >
                 Delete
