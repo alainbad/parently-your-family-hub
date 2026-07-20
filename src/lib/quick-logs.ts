@@ -11,6 +11,13 @@ export type QuickLog = {
   created_at: string;
 };
 
+export const QUICK_LOG_LABELS: Record<QuickLogKind, string> = {
+  symptom: "Symptom logged",
+  water: "Glass of water",
+  meal: "Meal logged",
+  sleep: "Rest logged",
+};
+
 function startOfToday(): string {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
@@ -40,6 +47,19 @@ export function useAddQuickLog(userId: string | undefined) {
       const { error } = await supabase
         .from("quick_logs")
         .insert({ user_id: userId, kind: input.kind, value: input.value ?? null });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quick_logs", "today", userId ?? "anon"] });
+    },
+  });
+}
+
+export function useDeleteQuickLog(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("quick_logs").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

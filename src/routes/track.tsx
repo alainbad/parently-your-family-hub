@@ -18,6 +18,7 @@ import { AffiliateSection } from "@/components/AffiliateCard";
 import { TRACK_PICKS } from "@/lib/affiliate-picks";
 import { useAuth } from "@/lib/auth";
 import { growthMeasurementsQuery } from "@/lib/growth";
+import { QUICK_LOG_LABELS, todaysLogsQuery, useDeleteQuickLog } from "@/lib/quick-logs";
 import {
   upcomingRemindersQuery,
   useAddReminder,
@@ -55,13 +56,6 @@ const LOGS = [
   { photo: trackTemperature, label: "Temperature", value: "36.8°C" },
 ];
 
-const TIMELINE = [
-  { time: "07:12", label: "Left breast · 14 min", kind: "Feeding" },
-  { time: "06:40", label: "Diaper · wet", kind: "Diaper" },
-  { time: "05:05", label: "Slept 4h 30m", kind: "Sleep" },
-  { time: "00:20", label: "Right breast · 18 min", kind: "Feeding" },
-];
-
 function TrackScreen() {
   const { user } = useAuth();
 
@@ -96,32 +90,7 @@ function TrackScreen() {
           ))}
         </div>
 
-        <section className="mt-7">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h3 className="font-display text-[17px] font-semibold text-ink">Timeline</h3>
-            <span className="text-xs font-semibold text-ink-soft">Today</span>
-          </div>
-
-          <div className="rounded-[1.75rem] border border-border bg-surface p-2">
-            {TIMELINE.map((item, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted"
-              >
-                <span className="font-display text-[15px] font-semibold text-ink">{item.time}</span>
-                <span className="min-w-0">
-                  <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary">
-                    {item.kind}
-                  </span>
-                  <span className="mt-0.5 block truncate text-[14px] text-ink">{item.label}</span>
-                </span>
-                <button className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft">
-                  Edit
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
+        <TimelineSection userId={user?.id} />
 
         <RemindersSection userId={user?.id} />
 
@@ -130,6 +99,66 @@ function TrackScreen() {
         <AffiliateSection title="Gear that helps you track" picks={TRACK_PICKS} surface="track" />
       </div>
     </AppShell>
+  );
+}
+
+function TimelineSection({ userId }: { userId: string | undefined }) {
+  const logsQuery = useQuery(todaysLogsQuery(userId));
+  const deleteLog = useDeleteQuickLog(userId);
+
+  return (
+    <section className="mt-7">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h3 className="font-display text-[17px] font-semibold text-ink">Timeline</h3>
+        <span className="text-xs font-semibold text-ink-soft">Today</span>
+      </div>
+
+      {!userId ? (
+        <div className="rounded-2xl border border-dashed border-border bg-surface/60 p-5 text-center text-sm text-ink-soft">
+          <Link to="/auth" className="font-semibold text-primary">
+            Sign in
+          </Link>{" "}
+          to see your logged symptoms, water, meals, and sleep here.
+        </div>
+      ) : logsQuery.isLoading ? (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-ink-soft" />
+        </div>
+      ) : logsQuery.data?.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-surface/60 p-5 text-center text-sm text-ink-soft">
+          Nothing logged yet today — tap a Quick log tile on Home to add one.
+        </div>
+      ) : (
+        <div className="rounded-[1.75rem] border border-border bg-surface p-2">
+          {logsQuery.data?.map((log) => (
+            <div
+              key={log.id}
+              className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted"
+            >
+              <span className="font-display text-[15px] font-semibold text-ink">
+                {format(new Date(log.created_at), "HH:mm")}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary">
+                  {log.kind}
+                </span>
+                <span className="mt-0.5 block truncate text-[14px] text-ink">
+                  {log.value ?? QUICK_LOG_LABELS[log.kind]}
+                </span>
+              </span>
+              <button
+                type="button"
+                disabled={deleteLog.isPending}
+                onClick={() => deleteLog.mutate(log.id)}
+                className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft disabled:opacity-50"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
