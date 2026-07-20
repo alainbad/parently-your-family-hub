@@ -319,7 +319,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_household_member: {
+        Args: { target_household_id: string }
+        Returns: boolean
+      }
+      redeem_household_invite: {
+        Args: { invite_code: string }
+        Returns: string
+      }
+      shares_household_with: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
