@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Members can view household members" ON public.household_members;
