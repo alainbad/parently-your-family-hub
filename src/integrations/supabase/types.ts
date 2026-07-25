@@ -343,6 +343,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      debug_auth_uid: { Args: never; Returns: string }
       is_household_member: {
         Args: { target_household_id: string }
         Returns: boolean
