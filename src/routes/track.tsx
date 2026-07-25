@@ -7,12 +7,15 @@ import {
   Bell,
   Calendar,
   Check,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   Loader2,
   Pill,
   Plus,
   Ruler,
   Syringe,
+  X,
 } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { AffiliateSection } from "@/components/AffiliateCard";
@@ -39,6 +42,8 @@ import {
   vaccineRecordsQuery,
   useDeleteVaccineRecord,
   useLogVaccine,
+  useMarkVaccineGiven,
+  useScheduleVaccine,
 } from "@/lib/vaccinations";
 import trackFeeding from "@/assets/track-feeding.jpg";
 import trackSleep from "@/assets/track-sleep.jpg";
@@ -409,15 +414,47 @@ function AddReminderForm({ userId, onDone }: { userId: string; onDone: () => voi
   );
 }
 
+const VACCINATIONS_COLLAPSED_COUNT = 5;
+
+type VaccineFormMode = "schedule" | "log" | "markGiven";
+
 function VaccinationsSection({ userId }: { userId: string | undefined }) {
   const records = useQuery(vaccineRecordsQuery(userId));
   const logVaccine = useLogVaccine(userId);
+  const scheduleVaccine = useScheduleVaccine(userId);
+  const markGiven = useMarkVaccineGiven(userId);
   const deleteRecord = useDeleteVaccineRecord(userId);
-  const [loggingId, setLoggingId] = useState<string | null>(null);
-  const [givenAt, setGivenAt] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [openMode, setOpenMode] = useState<VaccineFormMode | null>(null);
+  const [formValue, setFormValue] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const recordByLabel = new Map((records.data ?? []).map((r) => [r.title, r]));
-  const givenCount = VACCINE_SCHEDULE.filter((item) => recordByLabel.get(item.label)).length;
+  const givenCount = VACCINE_SCHEDULE.filter(
+    (item) => recordByLabel.get(item.label)?.completed_at,
+  ).length;
+  const visibleItems = expanded
+    ? VACCINE_SCHEDULE
+    : VACCINE_SCHEDULE.slice(0, VACCINATIONS_COLLAPSED_COUNT);
+
+  const openForm = (id: string, mode: VaccineFormMode, initialValue: string) => {
+    if (openId === id && openMode === mode) {
+      setOpenId(null);
+      setOpenMode(null);
+      return;
+    }
+    setOpenId(id);
+    setOpenMode(mode);
+    setFormValue(initialValue);
+  };
+
+  const closeForm = () => {
+    setOpenId(null);
+    setOpenMode(null);
+  };
+
+  const todayDate = () => new Date().toISOString().slice(0, 10);
+  const nowDateTime = () => new Date().toISOString().slice(0, 16);
 
   return (
     <section className="mt-7">
@@ -442,100 +479,225 @@ function VaccinationsSection({ userId }: { userId: string | undefined }) {
           <Loader2 className="h-5 w-5 animate-spin text-ink-soft" />
         </div>
       ) : (
-        <div className="rounded-[1.75rem] border border-border bg-surface p-2">
-          {VACCINE_SCHEDULE.map((item) => {
-            const record = recordByLabel.get(item.label);
-            const given = Boolean(record);
-            const isLogging = loggingId === item.id;
-            return (
-              <div key={item.id} className="rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted">
-                <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3">
-                  <span
-                    className={`grid h-9 w-9 place-items-center rounded-full ${
-                      given ? "bg-primary/10 text-primary" : "bg-surface-muted text-ink-soft"
-                    }`}
-                  >
-                    <Syringe className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[14px] font-semibold text-ink">
-                      {item.label}
-                    </span>
-                    <span className="mt-0.5 block text-[11px] text-ink-soft">
-                      {given && record
-                        ? `Given ${format(new Date(record.due_at), "MMM d, yyyy")}`
-                        : `Recommended at ${item.ageLabel}`}
-                    </span>
-                  </span>
-                  {given && record ? (
-                    <button
-                      type="button"
-                      aria-label="Remove this record"
-                      disabled={deleteRecord.isPending}
-                      onClick={() =>
-                        deleteRecord.mutate(record.id, {
-                          onError: (err) =>
-                            toast.error(getErrorMessage(err, "Could not remove that record")),
-                        })
-                      }
-                      className="grid h-8 w-8 place-items-center rounded-full border border-border text-ink-soft hover:bg-background disabled:opacity-50"
-                    >
-                      <Check className="h-4 w-4" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (isLogging) {
-                          setLoggingId(null);
-                        } else {
-                          setLoggingId(item.id);
-                          setGivenAt(new Date().toISOString().slice(0, 10));
-                        }
-                      }}
-                      className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft"
-                    >
-                      {isLogging ? "Close" : "Log it"}
-                    </button>
-                  )}
-                </div>
+        <>
+          <div className="rounded-[1.75rem] border border-border bg-surface p-2">
+            {visibleItems.map((item) => {
+              const record = recordByLabel.get(item.label);
+              const given = Boolean(record?.completed_at);
+              const scheduled = Boolean(record) && !given;
+              const isOpen = openId === item.id;
 
-                {isLogging ? (
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      logVaccine.mutate(
-                        { label: item.label, givenAt },
-                        {
-                          onSuccess: () => setLoggingId(null),
-                          onError: (err) =>
-                            toast.error(getErrorMessage(err, "Could not save that vaccine")),
-                        },
-                      );
-                    }}
-                    className="mt-2 flex items-center gap-2 pl-[52px]"
-                  >
-                    <input
-                      type="date"
-                      required
-                      value={givenAt}
-                      onChange={(e) => setGivenAt(e.target.value)}
-                      className="h-9 flex-1 rounded-lg border border-border bg-surface-alt px-2 text-[13px] text-ink focus:border-primary focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      disabled={logVaccine.isPending}
-                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-60"
+              return (
+                <div key={item.id} className="rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted">
+                  <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3">
+                    <span
+                      className={`grid h-9 w-9 place-items-center rounded-full ${
+                        given
+                          ? "bg-primary/10 text-primary"
+                          : scheduled
+                            ? "bg-accent/15 text-accent"
+                            : "bg-surface-muted text-ink-soft"
+                      }`}
                     >
-                      {logVaccine.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                      Save
-                    </button>
-                  </form>
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
+                      <Syringe className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[14px] font-semibold text-ink">
+                        {item.label}
+                      </span>
+                      <span className="mt-0.5 block text-[11px] text-ink-soft">
+                        {given && record
+                          ? `Given ${format(new Date(record.due_at), "MMM d, yyyy")}`
+                          : scheduled && record
+                            ? `Scheduled for ${format(new Date(record.due_at), "MMM d, yyyy · h:mm a")}`
+                            : `Recommended at ${item.ageLabel}`}
+                      </span>
+                    </span>
+
+                    {given && record ? (
+                      <button
+                        type="button"
+                        aria-label="Remove this record"
+                        disabled={deleteRecord.isPending}
+                        onClick={() =>
+                          deleteRecord.mutate(record.id, {
+                            onError: (err) =>
+                              toast.error(getErrorMessage(err, "Could not remove that record")),
+                          })
+                        }
+                        className="grid h-8 w-8 place-items-center rounded-full border border-border text-ink-soft hover:bg-background disabled:opacity-50"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    ) : scheduled && record ? (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => openForm(item.id, "markGiven", todayDate())}
+                          className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft"
+                        >
+                          {isOpen && openMode === "markGiven" ? "Close" : "Log it"}
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Cancel this reminder"
+                          disabled={deleteRecord.isPending}
+                          onClick={() =>
+                            deleteRecord.mutate(record.id, {
+                              onError: (err) =>
+                                toast.error(getErrorMessage(err, "Could not cancel that reminder")),
+                            })
+                          }
+                          className="grid h-8 w-8 place-items-center rounded-full border border-border text-ink-soft hover:bg-background disabled:opacity-50"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => openForm(item.id, "schedule", nowDateTime())}
+                          className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft"
+                        >
+                          {isOpen && openMode === "schedule" ? "Close" : "Schedule"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openForm(item.id, "log", todayDate())}
+                          className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft"
+                        >
+                          {isOpen && openMode === "log" ? "Close" : "Log it"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {isOpen && openMode === "schedule" ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        scheduleVaccine.mutate(
+                          { label: item.label, scheduledFor: formValue },
+                          {
+                            onSuccess: closeForm,
+                            onError: (err) =>
+                              toast.error(getErrorMessage(err, "Could not schedule that vaccine")),
+                          },
+                        );
+                      }}
+                      className="mt-2 flex items-center gap-2 pl-[52px]"
+                    >
+                      <input
+                        type="datetime-local"
+                        required
+                        value={formValue}
+                        onChange={(e) => setFormValue(e.target.value)}
+                        className="h-9 flex-1 rounded-lg border border-border bg-surface-alt px-2 text-[13px] text-ink focus:border-primary focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={scheduleVaccine.isPending}
+                        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-60"
+                      >
+                        {scheduleVaccine.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : null}
+                        Save
+                      </button>
+                    </form>
+                  ) : null}
+
+                  {isOpen && openMode === "log" ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        logVaccine.mutate(
+                          { label: item.label, givenAt: formValue },
+                          {
+                            onSuccess: closeForm,
+                            onError: (err) =>
+                              toast.error(getErrorMessage(err, "Could not save that vaccine")),
+                          },
+                        );
+                      }}
+                      className="mt-2 flex items-center gap-2 pl-[52px]"
+                    >
+                      <input
+                        type="date"
+                        required
+                        value={formValue}
+                        onChange={(e) => setFormValue(e.target.value)}
+                        className="h-9 flex-1 rounded-lg border border-border bg-surface-alt px-2 text-[13px] text-ink focus:border-primary focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={logVaccine.isPending}
+                        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-60"
+                      >
+                        {logVaccine.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        Save
+                      </button>
+                    </form>
+                  ) : null}
+
+                  {isOpen && openMode === "markGiven" && record ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        markGiven.mutate(
+                          { id: record.id, givenAt: formValue },
+                          {
+                            onSuccess: closeForm,
+                            onError: (err) =>
+                              toast.error(getErrorMessage(err, "Could not save that vaccine")),
+                          },
+                        );
+                      }}
+                      className="mt-2 flex items-center gap-2 pl-[52px]"
+                    >
+                      <input
+                        type="date"
+                        required
+                        value={formValue}
+                        onChange={(e) => setFormValue(e.target.value)}
+                        className="h-9 flex-1 rounded-lg border border-border bg-surface-alt px-2 text-[13px] text-ink focus:border-primary focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={markGiven.isPending}
+                        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-60"
+                      >
+                        {markGiven.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        Save
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+
+          {VACCINE_SCHEDULE.length > VACCINATIONS_COLLAPSED_COUNT ? (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl py-2.5 text-[12px] font-semibold text-primary"
+            >
+              {expanded ? (
+                <>
+                  Show less
+                  <ChevronUp className="h-3.5 w-3.5" />
+                </>
+              ) : (
+                <>
+                  Show all {VACCINE_SCHEDULE.length}
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </>
+              )}
+            </button>
+          ) : null}
+        </>
       )}
     </section>
   );

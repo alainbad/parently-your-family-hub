@@ -44,6 +44,7 @@ export function useAddReminder(userId: string | undefined) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["reminders", "upcoming", userId ?? "anon"] });
+      qc.invalidateQueries({ queryKey: ["reminders", "vaccines", userId ?? "anon"] });
     },
   });
 }
@@ -60,6 +61,7 @@ export function useCompleteReminder(userId: string | undefined) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["reminders", "upcoming", userId ?? "anon"] });
+      qc.invalidateQueries({ queryKey: ["reminders", "vaccines", userId ?? "anon"] });
     },
   });
 }

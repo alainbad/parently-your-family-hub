@@ -82,6 +82,47 @@ export function useLogVaccine(userId: string | undefined) {
   });
 }
 
+// Books the appointment as an upcoming reminder (shows in the Reminders
+// list until it's marked given) rather than recording it as already done.
+export function useScheduleVaccine(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { label: string; scheduledFor: string }) => {
+      if (!userId) throw new Error("Not signed in");
+      const { error } = await supabase.from("reminders").insert({
+        user_id: userId,
+        kind: "vaccine",
+        title: input.label,
+        due_at: new Date(input.scheduledFor).toISOString(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["reminders", "vaccines", userId ?? "anon"] });
+      qc.invalidateQueries({ queryKey: ["reminders", "upcoming", userId ?? "anon"] });
+    },
+  });
+}
+
+// Marks an already-scheduled dose as given, on the date it actually happened.
+export function useMarkVaccineGiven(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; givenAt: string }) => {
+      const isoDate = new Date(input.givenAt).toISOString();
+      const { error } = await supabase
+        .from("reminders")
+        .update({ due_at: isoDate, completed_at: isoDate })
+        .eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["reminders", "vaccines", userId ?? "anon"] });
+      qc.invalidateQueries({ queryKey: ["reminders", "upcoming", userId ?? "anon"] });
+    },
+  });
+}
+
 export function useDeleteVaccineRecord(userId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
