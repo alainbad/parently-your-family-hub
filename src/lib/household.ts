@@ -108,15 +108,16 @@ export const createHouseholdInvite = createServerFn({ method: "POST" })
         .select("id")
         .single();
       if (createErr || !household) {
-        // Temporary diagnostic: compare what the DB resolves auth.uid() to
-        // against the owner_id we sent, to tell an identity mismatch apart
-        // from a genuine policy/grant bug.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- debug_auth_uid isn't in generated types yet
-        const { data: whoami, error: whoamiErr } = await (context.supabase as any).rpc(
-          "debug_auth_uid",
+        // Temporary diagnostic: auth.uid() already matched owner_id, so this
+        // checks whether the connection is actually running as the
+        // `authenticated` Postgres role (which RLS "TO authenticated"
+        // policies key off), separately from the JWT's sub claim.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- debug_auth_context isn't in generated types yet
+        const { data: authCtx, error: authCtxErr } = await (context.supabase as any).rpc(
+          "debug_auth_context",
         );
         throw new Error(
-          `${describeError(createErr, "Could not create family group")} | attempted owner_id=${context.userId} | db auth.uid()=${whoamiErr ? describeError(whoamiErr, "error") : (whoami ?? "null")}`,
+          `${describeError(createErr, "Could not create family group")} | attempted owner_id=${context.userId} | auth context=${authCtxErr ? describeError(authCtxErr, "error") : JSON.stringify(authCtx)}`,
         );
       }
       const { error: memberErr } = await context.supabase
