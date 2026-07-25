@@ -108,17 +108,7 @@ export const createHouseholdInvite = createServerFn({ method: "POST" })
         .select("id")
         .single();
       if (createErr || !household) {
-        // Temporary diagnostic: auth.uid() already matched owner_id, so this
-        // checks whether the connection is actually running as the
-        // `authenticated` Postgres role (which RLS "TO authenticated"
-        // policies key off), separately from the JWT's sub claim.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- debug_auth_context isn't in generated types yet
-        const { data: authCtx, error: authCtxErr } = await (context.supabase as any).rpc(
-          "debug_auth_context",
-        );
-        throw new Error(
-          `${describeError(createErr, "Could not create family group")} | attempted owner_id=${context.userId} | auth context=${authCtxErr ? describeError(authCtxErr, "error") : JSON.stringify(authCtx)}`,
-        );
+        throw new Error(describeError(createErr, "Could not create family group"));
       }
       const { error: memberErr } = await context.supabase
         .from("household_members")
