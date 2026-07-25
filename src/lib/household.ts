@@ -16,6 +16,20 @@ export type HouseholdInfo = {
   pendingInviteCode: string | null;
 };
 
+// Surfaces Postgres/PostgREST's code+details+hint (not just message) so RLS
+// and constraint failures are diagnosable from the on-screen error alone.
+function describeError(
+  err: { message: string; code?: string; details?: string | null; hint?: string | null } | null | undefined,
+  fallback: string,
+): string {
+  if (!err) return fallback;
+  const parts = [err.message || fallback];
+  if (err.code) parts.push(`code=${err.code}`);
+  if (err.details) parts.push(`details=${err.details}`);
+  if (err.hint) parts.push(`hint=${err.hint}`);
+  return parts.join(" | ");
+}
+
 function generateInviteCode(): string {
   // No 0/O/1/I — avoids codes that are ambiguous to read or type back in.
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -34,7 +48,7 @@ export const getMyHousehold = createServerFn({ method: "GET" })
       .select("household_id, role")
       .eq("user_id", context.userId)
       .maybeSingle();
-    if (membershipErr) throw new Error(membershipErr.message);
+    if (membershipErr) throw new Error(describeError(membershipErr, "Could not load your family group"));
     if (!membership) return { household: null, role: null, members: [], pendingInviteCode: null };
 
     const [{ data: household }, { data: members }] = await Promise.all([
@@ -79,7 +93,7 @@ export const createHouseholdInvite = createServerFn({ method: "POST" })
       .select("household_id, role")
       .eq("user_id", context.userId)
       .maybeSingle();
-    if (membershipErr) throw new Error(membershipErr.message);
+    if (membershipErr) throw new Error(describeError(membershipErr, "Could not load your family group"));
 
     let householdId: string;
     if (existingMembership) {
@@ -94,12 +108,14 @@ export const createHouseholdInvite = createServerFn({ method: "POST" })
         .select("id")
         .single();
       if (createErr || !household) {
-        throw new Error(createErr?.message ?? "Could not create family group");
+        throw new Error(
+          `${describeError(createErr, "Could not create family group")} | attempted owner_id=${context.userId}`,
+        );
       }
       const { error: memberErr } = await context.supabase
         .from("household_members")
         .insert({ household_id: household.id, user_id: context.userId, role: "owner" });
-      if (memberErr) throw new Error(memberErr.message);
+      if (memberErr) throw new Error(describeError(memberErr, "Could not add you to the family group"));
       householdId = household.id;
     }
 
@@ -111,7 +127,9 @@ export const createHouseholdInvite = createServerFn({ method: "POST" })
         created_by: context.userId,
       });
       if (!error) return { code };
-      if (!error.message.toLowerCase().includes("duplicate")) throw new Error(error.message);
+      if (!error.message.toLowerCase().includes("duplicate")) {
+        throw new Error(describeError(error, "Could not create an invite"));
+      }
     }
     throw new Error("Could not generate an invite code — try again.");
   });
@@ -129,7 +147,7 @@ export const acceptHouseholdInvite = createServerFn({ method: "POST" })
       .eq("code", inviteCode)
       .maybeSingle();
 
-    if (inviteError) throw new Error(inviteError.message);
+    if (inviteError) throw new Error(describeError(inviteError, "Could not look up that invite"));
     if (!invite || invite.accepted_at || new Date(invite.expires_at).getTime() <= Date.now()) {
       throw new Error("Invite code is invalid or expired");
     }
@@ -142,13 +160,13 @@ export const acceptHouseholdInvite = createServerFn({ method: "POST" })
       },
       { onConflict: "household_id,user_id" },
     );
-    if (memberError) throw new Error(memberError.message);
+    if (memberError) throw new Error(describeError(memberError, "Could not join that family group"));
 
     const { error: updateError } = await supabaseAdmin
       .from("household_invites")
       .update({ accepted_by: context.userId, accepted_at: new Date().toISOString() })
       .eq("id", invite.id);
-    if (updateError) throw new Error(updateError.message);
+    if (updateError) throw new Error(describeError(updateError, "Could not finalize the invite"));
 
     return { ok: true };
   });
@@ -160,7 +178,7 @@ export const leaveHousehold = createServerFn({ method: "POST" })
       .from("household_members")
       .delete()
       .eq("user_id", context.userId);
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(describeError(error, "Could not leave the family group"));
     return { ok: true };
   });
 
