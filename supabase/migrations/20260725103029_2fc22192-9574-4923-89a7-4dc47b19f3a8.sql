@@ -1,0 +1,1 @@
+ALTER TABLE public.households DISABLE ROW LEVEL SECURITY;
