@@ -34,6 +34,12 @@ import {
   useCompleteReminder,
   type ReminderKind,
 } from "@/lib/reminders";
+import {
+  VACCINE_SCHEDULE,
+  vaccineRecordsQuery,
+  useDeleteVaccineRecord,
+  useLogVaccine,
+} from "@/lib/vaccinations";
 import trackFeeding from "@/assets/track-feeding.jpg";
 import trackSleep from "@/assets/track-sleep.jpg";
 import trackDiapers from "@/assets/track-diapers.jpg";
@@ -148,6 +154,8 @@ function TrackScreen() {
         <TimelineSection userId={user?.id} />
 
         <RemindersSection userId={user?.id} />
+
+        <VaccinationsSection userId={user?.id} />
 
         <GrowthSummaryCard userId={user?.id} />
 
@@ -398,6 +406,138 @@ function AddReminderForm({ userId, onDone }: { userId: string; onDone: () => voi
         Save reminder
       </button>
     </form>
+  );
+}
+
+function VaccinationsSection({ userId }: { userId: string | undefined }) {
+  const records = useQuery(vaccineRecordsQuery(userId));
+  const logVaccine = useLogVaccine(userId);
+  const deleteRecord = useDeleteVaccineRecord(userId);
+  const [loggingId, setLoggingId] = useState<string | null>(null);
+  const [givenAt, setGivenAt] = useState("");
+
+  const recordByLabel = new Map((records.data ?? []).map((r) => [r.title, r]));
+  const givenCount = VACCINE_SCHEDULE.filter((item) => recordByLabel.get(item.label)).length;
+
+  return (
+    <section className="mt-7">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h3 className="font-display text-[17px] font-semibold text-ink">Vaccinations</h3>
+        {userId ? (
+          <span className="text-xs font-semibold text-ink-soft">
+            {givenCount}/{VACCINE_SCHEDULE.length} given
+          </span>
+        ) : null}
+      </div>
+
+      {!userId ? (
+        <div className="rounded-2xl border border-dashed border-border bg-surface/60 p-5 text-center text-sm text-ink-soft">
+          <Link to="/auth" className="font-semibold text-primary">
+            Sign in
+          </Link>{" "}
+          to track your child's vaccination schedule.
+        </div>
+      ) : records.isLoading ? (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-ink-soft" />
+        </div>
+      ) : (
+        <div className="rounded-[1.75rem] border border-border bg-surface p-2">
+          {VACCINE_SCHEDULE.map((item) => {
+            const record = recordByLabel.get(item.label);
+            const given = Boolean(record);
+            const isLogging = loggingId === item.id;
+            return (
+              <div key={item.id} className="rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted">
+                <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3">
+                  <span
+                    className={`grid h-9 w-9 place-items-center rounded-full ${
+                      given ? "bg-primary/10 text-primary" : "bg-surface-muted text-ink-soft"
+                    }`}
+                  >
+                    <Syringe className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[14px] font-semibold text-ink">
+                      {item.label}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] text-ink-soft">
+                      {given && record
+                        ? `Given ${format(new Date(record.due_at), "MMM d, yyyy")}`
+                        : `Recommended at ${item.ageLabel}`}
+                    </span>
+                  </span>
+                  {given && record ? (
+                    <button
+                      type="button"
+                      aria-label="Remove this record"
+                      disabled={deleteRecord.isPending}
+                      onClick={() =>
+                        deleteRecord.mutate(record.id, {
+                          onError: (err) =>
+                            toast.error(getErrorMessage(err, "Could not remove that record")),
+                        })
+                      }
+                      className="grid h-8 w-8 place-items-center rounded-full border border-border text-ink-soft hover:bg-background disabled:opacity-50"
+                    >
+                      <Check className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isLogging) {
+                          setLoggingId(null);
+                        } else {
+                          setLoggingId(item.id);
+                          setGivenAt(new Date().toISOString().slice(0, 10));
+                        }
+                      }}
+                      className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft"
+                    >
+                      {isLogging ? "Close" : "Log it"}
+                    </button>
+                  )}
+                </div>
+
+                {isLogging ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      logVaccine.mutate(
+                        { label: item.label, givenAt },
+                        {
+                          onSuccess: () => setLoggingId(null),
+                          onError: (err) =>
+                            toast.error(getErrorMessage(err, "Could not save that vaccine")),
+                        },
+                      );
+                    }}
+                    className="mt-2 flex items-center gap-2 pl-[52px]"
+                  >
+                    <input
+                      type="date"
+                      required
+                      value={givenAt}
+                      onChange={(e) => setGivenAt(e.target.value)}
+                      className="h-9 flex-1 rounded-lg border border-border bg-surface-alt px-2 text-[13px] text-ink focus:border-primary focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={logVaccine.isPending}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-60"
+                    >
+                      {logVaccine.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                      Save
+                    </button>
+                  </form>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
 

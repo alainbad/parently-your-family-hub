@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useTheme, THEME_PHOTOS, type Theme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
+import { profileQuery } from "@/lib/profile";
 import logoNewborn from "@/assets/logo-newborn.jpg";
-
 
 export const Route = createFileRoute("/")({
   component: Welcome,
@@ -38,14 +39,22 @@ const OPTIONS: {
 
 function Welcome() {
   const { theme, setTheme } = useTheme();
-  const { session, loading } = useAuth();
+  const { session, user, loading } = useAuth();
   const navigate = useNavigate();
+  const profile = useQuery(profileQuery(user?.id));
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/home", replace: true });
-  }, [loading, navigate, session]);
+    if (loading) return;
+    if (!session) {
+      navigate({ to: "/auth", replace: true });
+      return;
+    }
+    // Already picked a stage before — this is a returning sign-in, not onboarding.
+    if (profile.data?.stage) navigate({ to: "/home", replace: true });
+  }, [loading, navigate, session, profile.data]);
 
-  if (!loading && session) return null;
+  if (!loading && !session) return null;
+  if (loading || profile.isLoading || profile.data?.stage) return null;
 
   return (
     <div className="relative flex min-h-[100dvh] w-full flex-col bg-gradient-hero">
