@@ -108,8 +108,15 @@ export const createHouseholdInvite = createServerFn({ method: "POST" })
         .select("id")
         .single();
       if (createErr || !household) {
+        // Temporary diagnostic: compare what the DB resolves auth.uid() to
+        // against the owner_id we sent, to tell an identity mismatch apart
+        // from a genuine policy/grant bug.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- debug_auth_uid isn't in generated types yet
+        const { data: whoami, error: whoamiErr } = await (context.supabase as any).rpc(
+          "debug_auth_uid",
+        );
         throw new Error(
-          `${describeError(createErr, "Could not create family group")} | attempted owner_id=${context.userId}`,
+          `${describeError(createErr, "Could not create family group")} | attempted owner_id=${context.userId} | db auth.uid()=${whoamiErr ? describeError(whoamiErr, "error") : (whoami ?? "null")}`,
         );
       }
       const { error: memberErr } = await context.supabase
