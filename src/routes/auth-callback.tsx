@@ -30,7 +30,7 @@ function AuthCallback() {
         return;
       }
       if (restored.session) {
-        navigate({ to: "/home", replace: true });
+        navigate({ to: "/", replace: true });
         return;
       }
 
@@ -41,7 +41,7 @@ function AuthCallback() {
         return;
       }
       if (data.session) {
-        navigate({ to: "/home", replace: true });
+        navigate({ to: "/", replace: true });
         return;
       }
 

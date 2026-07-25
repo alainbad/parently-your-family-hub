@@ -20,7 +20,7 @@ function AuthScreen() {
   const busy = busyAction !== null;
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/home" });
+    if (!loading && session) navigate({ to: "/" });
   }, [session, loading, navigate]);
 
   const submit = async (e: React.FormEvent) => {
@@ -32,7 +32,7 @@ function AuthScreen() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/home` },
+          options: { emailRedirectTo: `${window.location.origin}/` },
         });
         if (error) throw error;
       } else {
@@ -52,7 +52,7 @@ function AuthScreen() {
     try {
       if (isEmbeddedPreview()) {
         await signInWithGooglePopupFallback();
-        navigate({ to: "/home", replace: true });
+        navigate({ to: "/", replace: true });
         return;
       }
 
@@ -68,7 +68,7 @@ function AuthScreen() {
       if (error) throw error;
       if (!data.session) throw new Error("Google sign-in finished, but no session was saved.");
 
-      navigate({ to: "/home", replace: true });
+      navigate({ to: "/", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Google sign-in failed");
       setBusyAction(null);
