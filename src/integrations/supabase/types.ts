@@ -349,6 +349,10 @@ export type Database = {
         Args: { target_household_id: string }
         Returns: boolean
       }
+      is_new_household_owner: {
+        Args: { target_owner_id: string }
+        Returns: boolean
+      }
       redeem_household_invite: {
         Args: { invite_code: string }
         Returns: string
