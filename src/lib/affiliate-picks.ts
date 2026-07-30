@@ -1,7 +1,8 @@
 import type { AffiliatePick } from "@/components/AffiliateCard";
 
-// TODO: replace `?tag=YOURTAG-20` with your Amazon Associates tag,
-// or swap in Babylist/Target affiliate URLs.
+// Amazon links use the pinterestd0f5-20 Associates tag. Babylist/FirstCry/Glo
+// links below still use placeholder ref codes until those affiliate accounts
+// are set up.
 
 export const HOME_PICKS: AffiliatePick[] = [
   {
@@ -9,7 +10,7 @@ export const HOME_PICKS: AffiliatePick[] = [
     vendor: "Amazon",
     price: "$32",
     blurb: "Padsicles, peri bottle, witch hazel — first-week comfort.",
-    url: "https://www.amazon.com/s?k=postpartum+recovery+kit&tag=YOURTAG-20",
+    url: "https://www.amazon.com/s?k=postpartum+recovery+kit&tag=pinterestd0f5-20",
     emoji: "💗",
   },
   {
@@ -17,7 +18,7 @@ export const HOME_PICKS: AffiliatePick[] = [
     vendor: "Amazon",
     price: "$22",
     blurb: "Steady sound to smooth out nap and bedtime transitions.",
-    url: "https://www.amazon.com/s?k=white+noise+machine+baby&tag=YOURTAG-20",
+    url: "https://www.amazon.com/s?k=white+noise+machine+baby&tag=pinterestd0f5-20",
     emoji: "🌙",
   },
 ];
@@ -28,7 +29,7 @@ export const TRACK_PICKS: AffiliatePick[] = [
     vendor: "Amazon",
     price: "$16",
     blurb: "Fast, accurate reads for those middle-of-the-night checks.",
-    url: "https://www.amazon.com/s?k=digital+baby+thermometer&tag=YOURTAG-20",
+    url: "https://www.amazon.com/s?k=digital+baby+thermometer&tag=pinterestd0f5-20",
     emoji: "🌡️",
   },
   {
@@ -36,7 +37,7 @@ export const TRACK_PICKS: AffiliatePick[] = [
     vendor: "Amazon",
     price: "$149",
     blurb: "Hands-free pumping that fits inside your normal bra.",
-    url: "https://www.amazon.com/s?k=wearable+breast+pump&tag=YOURTAG-20",
+    url: "https://www.amazon.com/s?k=wearable+breast+pump&tag=pinterestd0f5-20",
     emoji: "🍼",
   },
 ];
@@ -48,7 +49,7 @@ export const JOURNEY_PICKS_BY_WEEK: Record<string, AffiliatePick[]> = {
       vendor: "Amazon",
       price: "$24",
       blurb: "Eases lower-back pressure as bump grows.",
-      url: "https://www.amazon.com/s?k=maternity+belly+band&tag=YOURTAG-20",
+      url: "https://www.amazon.com/s?k=maternity+belly+band&tag=pinterestd0f5-20",
       emoji: "🤰",
     },
     {
@@ -66,7 +67,7 @@ export const JOURNEY_PICKS_BY_WEEK: Record<string, AffiliatePick[]> = {
       vendor: "Amazon",
       price: "$12",
       blurb: "Track daily fetal movement patterns.",
-      url: "https://www.amazon.com/s?k=kick+count+journal&tag=YOURTAG-20",
+      url: "https://www.amazon.com/s?k=kick+count+journal&tag=pinterestd0f5-20",
       emoji: "📓",
     },
   ],
@@ -84,7 +85,7 @@ export const JOURNEY_PICKS_BY_WEEK: Record<string, AffiliatePick[]> = {
       vendor: "Amazon",
       price: "$28",
       blurb: "Size N + wipes — first two weeks covered.",
-      url: "https://www.amazon.com/s?k=newborn+diapers+size+n&tag=YOURTAG-20",
+      url: "https://www.amazon.com/s?k=newborn+diapers+size+n&tag=pinterestd0f5-20",
       emoji: "🍼",
     },
   ],
@@ -94,7 +95,7 @@ export const JOURNEY_PICKS_BY_WEEK: Record<string, AffiliatePick[]> = {
       vendor: "Amazon",
       price: "$45",
       blurb: "Supports baby & saves your shoulders during feeds.",
-      url: "https://www.amazon.com/s?k=nursing+pillow&tag=YOURTAG-20",
+      url: "https://www.amazon.com/s?k=nursing+pillow&tag=pinterestd0f5-20",
       emoji: "🛋️",
     },
     {
