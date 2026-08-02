@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { ExternalLink, Play, Search, X } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import {
   CATEGORY_PHOTOS,
@@ -8,6 +8,7 @@ import {
   LEARN_CATEGORIES,
   type LearnCategory,
 } from "@/lib/learn-articles";
+import { LEARN_VIDEOS, youtubeThumbnailUrl, youtubeWatchUrl } from "@/lib/learn-videos";
 
 const LEARN_URL = "https://parently-babytracking.com/learn";
 
@@ -54,6 +55,15 @@ function LearnScreen() {
     : query.trim()
       ? `Results for "${query.trim()}"`
       : "Editor's picks";
+
+  const filteredVideos = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return LEARN_VIDEOS.filter((v) => {
+      if (category && v.category !== category) return false;
+      if (!q) return true;
+      return v.title.toLowerCase().includes(q) || v.source.toLowerCase().includes(q);
+    });
+  }, [query, category]);
 
   return (
     <AppShell>
@@ -156,6 +166,49 @@ function LearnScreen() {
             </div>
           )}
         </section>
+
+        {filteredVideos.length > 0 ? (
+          <section className="mt-7">
+            <div className="mb-3 flex items-baseline justify-between">
+              <h3 className="font-display text-[17px] font-semibold text-ink">
+                {category ? `${category} videos` : "Videos worth watching"}
+              </h3>
+              <span className="text-xs font-semibold text-ink-soft">On YouTube</span>
+            </div>
+            <div className="flex flex-col gap-3">
+              {filteredVideos.map((v) => (
+                <a
+                  key={v.id}
+                  href={youtubeWatchUrl(v.youtubeId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-[1.5rem] border border-border bg-surface p-3 shadow-soft transition-transform active:scale-[0.99]"
+                >
+                  <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-[1rem] bg-surface-muted">
+                    <img
+                      src={youtubeThumbnailUrl(v.youtubeId)}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                    <span className="absolute inset-0 grid place-items-center bg-black/25">
+                      <span className="grid h-7 w-7 place-items-center rounded-full bg-white/90 text-ink">
+                        <Play className="h-3.5 w-3.5 fill-current" />
+                      </span>
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 font-display text-[14px] font-semibold leading-snug text-ink">
+                      {v.title}
+                    </p>
+                    <p className="mt-1 text-[12px] text-ink-soft">{v.source}</p>
+                  </div>
+                  <ExternalLink className="h-4 w-4 shrink-0 text-ink-soft" />
+                </a>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </AppShell>
   );
