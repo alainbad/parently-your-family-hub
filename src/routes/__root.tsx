@@ -93,13 +93,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents.",
       },
-      { property: "og:title", content: "Parently" },
+      { property: "og:title", content: "Parently — Your family's parenting companion" },
       {
         property: "og:description",
-        content: "Your family's parenting companion, from pregnancy to age 5.",
+        content: "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Parently — Your family's parenting companion" },
+      { name: "twitter:description", content: "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/0426f35a-308e-4c71-9863-f119578fa006" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/0426f35a-308e-4c71-9863-f119578fa006" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
