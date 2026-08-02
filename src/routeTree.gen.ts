@@ -13,7 +13,6 @@ import { Route as TrackRouteImport } from './routes/track'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as LearnRouteImport } from './routes/learn'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GrowthRouteImport } from './routes/growth'
@@ -23,6 +22,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth-callback'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NurtureIndexRouteImport } from './routes/nurture.index'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as NurtureThreadIdRouteImport } from './routes/nurture.$threadId'
 import { Route as LearnArticleIdRouteImport } from './routes/learn.$articleId'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -45,11 +45,6 @@ const ProfileRoute = ProfileRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JourneyRoute = JourneyRouteImport.update({
@@ -97,15 +92,20 @@ const NurtureIndexRoute = NurtureIndexRouteImport.update({
   path: '/nurture/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/learn/',
+  path: '/learn/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NurtureThreadIdRoute = NurtureThreadIdRouteImport.update({
   id: '/nurture/$threadId',
   path: '/nurture/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnArticleIdRoute = LearnArticleIdRouteImport.update({
-  id: '/$articleId',
-  path: '/$articleId',
-  getParentRoute: () => LearnRoute,
+  id: '/learn/$articleId',
+  path: '/learn/$articleId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
@@ -122,7 +122,6 @@ export interface FileRoutesByFullPath {
   '/growth': typeof GrowthRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
-  '/learn': typeof LearnRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
@@ -130,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/learn/$articleId': typeof LearnArticleIdRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
+  '/learn/': typeof LearnIndexRoute
   '/nurture/': typeof NurtureIndexRoute
 }
 export interface FileRoutesByTo {
@@ -141,7 +141,6 @@ export interface FileRoutesByTo {
   '/growth': typeof GrowthRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
-  '/learn': typeof LearnRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
@@ -149,6 +148,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/learn/$articleId': typeof LearnArticleIdRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
+  '/learn': typeof LearnIndexRoute
   '/nurture': typeof NurtureIndexRoute
 }
 export interface FileRoutesById {
@@ -161,7 +161,6 @@ export interface FileRoutesById {
   '/growth': typeof GrowthRoute
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
-  '/learn': typeof LearnRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
@@ -169,6 +168,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/learn/$articleId': typeof LearnArticleIdRoute
   '/nurture/$threadId': typeof NurtureThreadIdRoute
+  '/learn/': typeof LearnIndexRoute
   '/nurture/': typeof NurtureIndexRoute
 }
 export interface FileRouteTypes {
@@ -182,7 +182,6 @@ export interface FileRouteTypes {
     | '/growth'
     | '/home'
     | '/journey'
-    | '/learn'
     | '/onboarding'
     | '/profile'
     | '/shop'
@@ -190,6 +189,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/learn/$articleId'
     | '/nurture/$threadId'
+    | '/learn/'
     | '/nurture/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -201,7 +201,6 @@ export interface FileRouteTypes {
     | '/growth'
     | '/home'
     | '/journey'
-    | '/learn'
     | '/onboarding'
     | '/profile'
     | '/shop'
@@ -209,6 +208,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/learn/$articleId'
     | '/nurture/$threadId'
+    | '/learn'
     | '/nurture'
   id:
     | '__root__'
@@ -220,7 +220,6 @@ export interface FileRouteTypes {
     | '/growth'
     | '/home'
     | '/journey'
-    | '/learn'
     | '/onboarding'
     | '/profile'
     | '/shop'
@@ -228,6 +227,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/learn/$articleId'
     | '/nurture/$threadId'
+    | '/learn/'
     | '/nurture/'
   fileRoutesById: FileRoutesById
 }
@@ -240,13 +240,14 @@ export interface RootRouteChildren {
   GrowthRoute: typeof GrowthRoute
   HomeRoute: typeof HomeRoute
   JourneyRoute: typeof JourneyRoute
-  LearnRoute: typeof LearnRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
   ShopRoute: typeof ShopRoute
   TrackRoute: typeof TrackRoute
   ApiChatRoute: typeof ApiChatRoute
+  LearnArticleIdRoute: typeof LearnArticleIdRoute
   NurtureThreadIdRoute: typeof NurtureThreadIdRoute
+  LearnIndexRoute: typeof LearnIndexRoute
   NurtureIndexRoute: typeof NurtureIndexRoute
 }
 
@@ -278,13 +279,6 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/journey': {
@@ -350,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NurtureIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn/': {
+      id: '/learn/'
+      path: '/learn'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nurture/$threadId': {
       id: '/nurture/$threadId'
       path: '/nurture/$threadId'
@@ -359,10 +360,10 @@ declare module '@tanstack/react-router' {
     }
     '/learn/$articleId': {
       id: '/learn/$articleId'
-      path: '/$articleId'
+      path: '/learn/$articleId'
       fullPath: '/learn/$articleId'
       preLoaderRoute: typeof LearnArticleIdRouteImport
-      parentRoute: typeof LearnRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
       id: '/api/chat'
@@ -374,16 +375,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface LearnRouteChildren {
-  LearnArticleIdRoute: typeof LearnArticleIdRoute
-}
-
-const LearnRouteChildren: LearnRouteChildren = {
-  LearnArticleIdRoute: LearnArticleIdRoute,
-}
-
-const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
@@ -393,13 +384,14 @@ const rootRouteChildren: RootRouteChildren = {
   GrowthRoute: GrowthRoute,
   HomeRoute: HomeRoute,
   JourneyRoute: JourneyRoute,
-  LearnRoute: LearnRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
   ShopRoute: ShopRoute,
   TrackRoute: TrackRoute,
   ApiChatRoute: ApiChatRoute,
+  LearnArticleIdRoute: LearnArticleIdRoute,
   NurtureThreadIdRoute: NurtureThreadIdRoute,
+  LearnIndexRoute: LearnIndexRoute,
   NurtureIndexRoute: NurtureIndexRoute,
 }
 export const routeTree = rootRouteImport
