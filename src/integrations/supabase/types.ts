@@ -251,6 +251,30 @@ export type Database = {
         }
         Relationships: []
       }
+      milestone_records: {
+        Row: {
+          achieved_at: string
+          created_at: string
+          id: string
+          milestone_key: string
+          user_id: string
+        }
+        Insert: {
+          achieved_at: string
+          created_at?: string
+          id?: string
+          milestone_key: string
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string
+          created_at?: string
+          id?: string
+          milestone_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           baby_name: string | null
