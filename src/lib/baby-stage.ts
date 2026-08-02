@@ -62,24 +62,44 @@ export function useLocalStageAnswers(): StageAnswers | null {
   return answers;
 }
 
+/** Once a birth date is known, which stage bucket it falls into is fully
+ * computable from age — so age (not a manually-picked, easily-stale field)
+ * is the source of truth for anything post-birth. "pregnancy" is the one
+ * value that can't be derived this way, since there's no birth date yet. */
+export function deriveStage(
+  stage: Stage,
+  birthDate: string | null | undefined,
+  today: Date = new Date(),
+): Stage {
+  if (stage === "pregnancy" || !birthDate) return stage;
+  const weeks = ageInWeeks(birthDate, today);
+  if (weeks < 13) return "newborn"; // 0-3 months
+  if (weeks < 52) return "baby"; // 3-12 months
+  if (weeks < 156) return "toddler"; // 1-3 years
+  return "preschool"; // 3-5 years
+}
+
 /** Prefer the signed-in profile's stage data; fall back to the local,
  * pre-sign-in answers only when signed out (once signed in, OnboardingSync
- * either already synced them or there's nothing to show yet). */
+ * either already synced them or there's nothing to show yet). Stage is
+ * re-derived from age so it can't silently go stale as baby grows. */
 export function resolveStageAnswers(
   isSignedIn: boolean,
   profileFields:
     { stage: Stage | null; due_date: string | null; birth_date: string | null } | null | undefined,
   localAnswers: StageAnswers | null,
 ): StageAnswers | null {
-  if (profileFields?.stage) {
-    return {
-      stage: profileFields.stage,
-      dueDate: profileFields.due_date ?? undefined,
-      birthDate: profileFields.birth_date ?? undefined,
-    };
-  }
-  if (!isSignedIn) return localAnswers;
-  return null;
+  const raw = profileFields?.stage
+    ? {
+        stage: profileFields.stage,
+        dueDate: profileFields.due_date ?? undefined,
+        birthDate: profileFields.birth_date ?? undefined,
+      }
+    : !isSignedIn
+      ? localAnswers
+      : null;
+  if (!raw) return null;
+  return { ...raw, stage: deriveStage(raw.stage, raw.birthDate) };
 }
 
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
