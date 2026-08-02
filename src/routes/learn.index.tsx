@@ -9,7 +9,7 @@ import {
   type LearnCategory,
 } from "@/lib/learn-articles";
 
-export const Route = createFileRoute("/learn")({
+export const Route = createFileRoute("/learn/")({
   component: LearnScreen,
 });
 
