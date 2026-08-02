@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ChevronUp,
   Loader2,
+  Pencil,
   Pill,
   Plus,
   Ruler,
@@ -26,11 +27,17 @@ import {
   todaysBabyLogsQuery,
   useAddBabyLog,
   useDeleteBabyLog,
+  useUpdateBabyLog,
   type BabyLogKind,
 } from "@/lib/baby-logs";
 import { getErrorMessage } from "@/lib/errors";
 import { growthMeasurementsQuery } from "@/lib/growth";
-import { QUICK_LOG_LABELS, todaysLogsQuery, useDeleteQuickLog } from "@/lib/quick-logs";
+import {
+  QUICK_LOG_LABELS,
+  todaysLogsQuery,
+  useDeleteQuickLog,
+  useUpdateQuickLog,
+} from "@/lib/quick-logs";
 import {
   upcomingRemindersQuery,
   useAddReminder,
@@ -183,6 +190,10 @@ function TimelineSection({ userId }: { userId: string | undefined }) {
   const babyLogsQuery = useQuery(todaysBabyLogsQuery(userId));
   const deleteLog = useDeleteQuickLog(userId);
   const deleteBabyLog = useDeleteBabyLog(userId);
+  const updateLog = useUpdateQuickLog(userId);
+  const updateBabyLog = useUpdateBabyLog(userId);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editTime, setEditTime] = useState("");
 
   const entries = useMemo<TimelineEntry[]>(() => {
     const quick = (logsQuery.data ?? []).map((log) => ({
@@ -230,40 +241,107 @@ function TimelineSection({ userId }: { userId: string | undefined }) {
         </div>
       ) : (
         <div className="rounded-[1.75rem] border border-border bg-surface p-2">
-          {entries.map((entry) => (
-            <div
-              key={`${entry.source}-${entry.id}`}
-              className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted"
-            >
-              <span className="font-display text-[15px] font-semibold text-ink">
-                {format(new Date(entry.created_at), "HH:mm")}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary">
-                  {entry.kindLabel}
-                </span>
-                <span className="mt-0.5 block truncate text-[14px] text-ink">
-                  {entry.description}
-                </span>
-              </span>
-              <button
-                type="button"
-                disabled={deleteLog.isPending || deleteBabyLog.isPending}
-                onClick={() => {
-                  const onError = (err: unknown) =>
-                    toast.error(getErrorMessage(err, "Could not delete that entry"));
-                  if (entry.source === "quick") {
-                    deleteLog.mutate(entry.id, { onError });
-                  } else {
-                    deleteBabyLog.mutate(entry.id, { onError });
-                  }
-                }}
-                className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft disabled:opacity-50"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
+          {entries.map((entry) => {
+            const key = `${entry.source}-${entry.id}`;
+            const isEditing = editingKey === key;
+            const isUpdating =
+              entry.source === "quick" ? updateLog.isPending : updateBabyLog.isPending;
+
+            return (
+              <div key={key} className="rounded-[1.25rem] px-3 py-3 hover:bg-surface-muted">
+                <div className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3">
+                  <span className="font-display text-[15px] font-semibold text-ink">
+                    {format(new Date(entry.created_at), "HH:mm")}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary">
+                      {entry.kindLabel}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[14px] text-ink">
+                      {entry.description}
+                    </span>
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      aria-label="Edit time"
+                      onClick={() => {
+                        if (isEditing) {
+                          setEditingKey(null);
+                        } else {
+                          setEditingKey(key);
+                          setEditTime(format(new Date(entry.created_at), "HH:mm"));
+                        }
+                      }}
+                      className="grid h-8 w-8 place-items-center rounded-full border border-border text-ink-soft hover:bg-background"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deleteLog.isPending || deleteBabyLog.isPending}
+                      onClick={() => {
+                        const onError = (err: unknown) =>
+                          toast.error(getErrorMessage(err, "Could not delete that entry"));
+                        if (entry.source === "quick") {
+                          deleteLog.mutate(entry.id, { onError });
+                        } else {
+                          deleteBabyLog.mutate(entry.id, { onError });
+                        }
+                      }}
+                      className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink-soft disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+
+                {isEditing ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      // Keep the entry on its original calendar day — only the
+                      // time of day changes — so it doesn't drop out of "today".
+                      const [hours, minutes] = editTime.split(":").map(Number);
+                      const newDate = new Date(entry.created_at);
+                      newDate.setHours(hours, minutes, 0, 0);
+                      const onError = (err: unknown) =>
+                        toast.error(getErrorMessage(err, "Could not update that entry"));
+                      const onSuccess = () => setEditingKey(null);
+                      if (entry.source === "quick") {
+                        updateLog.mutate(
+                          { id: entry.id, created_at: newDate.toISOString() },
+                          { onSuccess, onError },
+                        );
+                      } else {
+                        updateBabyLog.mutate(
+                          { id: entry.id, created_at: newDate.toISOString() },
+                          { onSuccess, onError },
+                        );
+                      }
+                    }}
+                    className="mt-2 flex items-center gap-2 pl-[68px]"
+                  >
+                    <input
+                      type="time"
+                      required
+                      value={editTime}
+                      onChange={(e) => setEditTime(e.target.value)}
+                      className="h-9 flex-1 rounded-lg border border-border bg-surface-alt px-2 text-[13px] text-ink focus:border-primary focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isUpdating}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-60"
+                    >
+                      {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                      Save
+                    </button>
+                  </form>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       )}
     </section>
