@@ -1,60 +1,80 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check } from "lucide-react";
-import { useTheme, THEME_PHOTOS, type Theme } from "@/lib/theme";
+import { Bell, LogIn, Ruler, Sparkles, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { profileQuery } from "@/lib/profile";
+import { PREGNANCY_PHOTO } from "@/lib/theme";
 import logoNewborn from "@/assets/logo-newborn.jpg";
 
+const SITE_URL = "https://parently-babytracking.com/";
+
 export const Route = createFileRoute("/")({
-  component: Welcome,
+  head: () => ({
+    meta: [
+      { name: "robots", content: "index, follow" },
+      { property: "og:url", content: SITE_URL },
+    ],
+    links: [{ rel: "canonical", href: SITE_URL }],
+    scripts: [
+      {
+        attrs: { type: "application/ld+json" },
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "MobileApplication",
+          name: "Parently",
+          url: SITE_URL,
+          description:
+            "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents.",
+          applicationCategory: "LifestyleApplication",
+          operatingSystem: "Web",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+          },
+        }),
+      },
+    ],
+  }),
+  component: Landing,
 });
 
-const OPTIONS: {
-  id: Theme;
-  title: string;
-  hint: string;
-  photo: string;
-}[] = [
+const FEATURES: { icon: typeof Sparkles; title: string; body: string }[] = [
   {
-    id: "girl",
-    title: "It's a girl",
-    hint: "Rose & lavender theme",
-    photo: THEME_PHOTOS.girl,
+    icon: Sparkles,
+    title: "Quick logs",
+    body: "Tap once to log symptoms, water, meals, feeds, sleep, and diaper changes — no forms to fill out.",
   },
   {
-    id: "boy",
-    title: "It's a boy",
-    hint: "Sky & lavender theme",
-    photo: THEME_PHOTOS.boy,
+    icon: Ruler,
+    title: "Growth tracking",
+    body: "Chart weight, height, and head circumference over time and see the trend at a glance.",
   },
   {
-    id: "neutral",
-    title: "We don't know yet",
-    hint: "Soft grey theme",
-    photo: THEME_PHOTOS.neutral,
+    icon: Bell,
+    title: "Reminders & vaccinations",
+    body: "Schedule appointments and doses ahead of time, then mark them given when they happen.",
+  },
+  {
+    icon: Users,
+    title: "Family sharing",
+    body: "Invite your partner so you both see and log the same appointments, reminders, and growth entries.",
   },
 ];
 
-function Welcome() {
-  const { theme, setTheme } = useTheme();
+function Landing() {
   const { session, user, loading } = useAuth();
   const navigate = useNavigate();
   const profile = useQuery(profileQuery(user?.id));
 
   useEffect(() => {
-    if (loading) return;
-    if (!session) {
-      navigate({ to: "/auth", replace: true });
-      return;
-    }
-    // Already picked a stage before — this is a returning sign-in, not onboarding.
-    if (profile.data?.stage) navigate({ to: "/home", replace: true });
+    if (loading || !session) return;
+    // Signed in — this page is only for signed-out visitors, route onward.
+    navigate({ to: profile.data?.stage ? "/home" : "/get-started", replace: true });
   }, [loading, navigate, session, profile.data]);
 
-  if (!loading && !session) return null;
-  if (loading || profile.isLoading || profile.data?.stage) return null;
+  if (loading || session) return null;
 
   return (
     <div className="relative flex min-h-[100dvh] w-full flex-col bg-gradient-hero">
@@ -72,77 +92,65 @@ function Welcome() {
             Parently
           </span>
         </div>
+        <Link
+          to="/auth"
+          className="inline-flex h-11 items-center gap-1.5 rounded-full bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-soft"
+        >
+          <LogIn className="h-4 w-4" />
+          Sign in
+        </Link>
       </header>
 
       <main className="flex flex-1 flex-col px-6 pt-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-          Welcome
-        </p>
-        <h1 className="mt-2 font-display text-[30px] leading-[1.1] font-semibold text-ink">
-          Let's begin with your{" "}
-          <span className="text-accent">little one</span>.
-        </h1>
-        <p className="mt-2 text-[14.5px] leading-relaxed text-ink-soft">
-          Pick what you know today — you can change this anytime.
-        </p>
+        <section className="relative overflow-hidden rounded-[2rem] shadow-lift">
+          <img
+            src={PREGNANCY_PHOTO}
+            alt="A parent gently cradling their bump"
+            className="aspect-[4/5] w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-90">
+              <Sparkles className="h-3.5 w-3.5" />
+              For growing families
+            </div>
+            <h1 className="mt-2 font-display text-[28px] leading-[1.08] font-semibold">
+              A calm companion for pregnancy through age 5.
+            </h1>
+            <p className="mt-2 text-[14px] leading-relaxed opacity-95">
+              Track the little things, stay ahead of appointments, and share it all with your
+              partner — one gentle app for both of you.
+            </p>
+          </div>
+        </section>
 
-        <div className="mt-6 flex flex-col gap-3">
-          {OPTIONS.map((opt) => {
-            const active = theme === opt.id;
-            return (
-              <button
-                key={opt.id}
-                onClick={() => setTheme(opt.id)}
-                className={`group relative overflow-hidden rounded-[1.75rem] border text-left transition-all active:scale-[0.99] ${
-                  active
-                    ? "border-primary/50 shadow-lift ring-2 ring-primary/30"
-                    : "border-border shadow-soft"
-                }`}
+        <section className="mt-7">
+          <div className="grid grid-cols-2 gap-3">
+            {FEATURES.map(({ icon: Icon, title, body }) => (
+              <div
+                key={title}
+                className="flex flex-col gap-2.5 rounded-[1.5rem] border border-border bg-surface p-4 shadow-soft"
               >
-                <div className="grid grid-cols-[112px_minmax(0,1fr)] items-stretch bg-surface">
-                  <div className="relative h-full w-28 overflow-hidden">
-                    <img
-                      src={opt.photo}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-4">
-                    <div className="min-w-0">
-                      <div className="font-display text-[17px] font-semibold text-ink">
-                        {opt.title}
-                      </div>
-                      <div className="mt-0.5 truncate text-[12.5px] text-ink-soft">
-                        {opt.hint}
-                      </div>
-                    </div>
-                    <span
-                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 transition-colors ${
-                        active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-transparent text-transparent"
-                      }`}
-                    >
-                      <Check className="h-4 w-4" strokeWidth={2.5} />
-                    </span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="font-display text-[14.5px] font-semibold text-ink">{title}</span>
+                <span className="text-[12px] leading-relaxed text-ink-soft">{body}</span>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       <footer className="safe-bottom sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent px-6 pb-6 pt-4">
-        <button
-          onClick={() => navigate({ to: "/onboarding" })}
+        <Link
+          to="/auth"
           className="inline-flex h-14 w-full items-center justify-center rounded-[1.25rem] bg-primary text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-[0.98]"
         >
-          Continue
-        </button>
+          Get started — it's free
+        </Link>
         <p className="mt-3 text-center text-xs text-ink-soft">
-          You can update this later in your profile.
+          Save your logs and pick up where you left off, on any device.
         </p>
       </footer>
     </div>

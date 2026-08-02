@@ -69,7 +69,7 @@ function Onboarding() {
 
         <header className="safe-top absolute inset-x-0 top-0 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-5 pt-5">
           <Link
-            to="/"
+            to="/get-started"
             className="grid h-10 w-10 place-items-center rounded-full bg-white/80 text-ink shadow-soft backdrop-blur transition-colors active:bg-white"
             aria-label="Back"
           >

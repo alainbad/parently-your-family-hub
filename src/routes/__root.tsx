@@ -96,17 +96,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Parently — Your family's parenting companion" },
       {
         property: "og:description",
-        content: "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents.",
+        content:
+          "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Parently" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Parently — Your family's parenting companion" },
-      { name: "twitter:description", content: "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/0426f35a-308e-4c71-9863-f119578fa006" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/0426f35a-308e-4c71-9863-f119578fa006" },
+      {
+        name: "twitter:description",
+        content:
+          "Parently is a warm, calm parenting companion for pregnancy through age 5 — tracking, milestones, and gentle guidance for both parents.",
+      },
+      { property: "og:image", content: "https://parently-babytracking.com/og-image.jpg" },
+      { name: "twitter:image", content: "https://parently-babytracking.com/og-image.jpg" },
+      // Most routes are signed-in-only app screens with nothing indexable —
+      // default to noindex and let the public landing page (/) opt back in.
+      { name: "robots", content: "noindex, nofollow" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/favicon.ico" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
