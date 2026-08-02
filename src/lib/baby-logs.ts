@@ -57,6 +57,22 @@ export function useAddBabyLog(userId: string | undefined) {
   });
 }
 
+export function useUpdateBabyLog(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; created_at: string }) => {
+      const { error } = await supabase
+        .from("baby_logs")
+        .update({ created_at: input.created_at })
+        .eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["baby_logs", "today", userId ?? "anon"] });
+    },
+  });
+}
+
 export function useDeleteBabyLog(userId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({

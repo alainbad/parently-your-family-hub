@@ -55,6 +55,22 @@ export function useAddQuickLog(userId: string | undefined) {
   });
 }
 
+export function useUpdateQuickLog(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; created_at: string }) => {
+      const { error } = await supabase
+        .from("quick_logs")
+        .update({ created_at: input.created_at })
+        .eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quick_logs", "today", userId ?? "anon"] });
+    },
+  });
+}
+
 export function useDeleteQuickLog(userId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
