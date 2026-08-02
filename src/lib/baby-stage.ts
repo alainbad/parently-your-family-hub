@@ -151,6 +151,8 @@ export function stageHeroLine(
 }
 
 export type StageMilestone = {
+  /** Stable key used to store achievement records — never rename once shipped. */
+  id: string;
   /** Pregnancy: week number (1-42). Other stages: age in weeks. */
   atWeek: number;
   title: string;
@@ -162,21 +164,25 @@ export type StageMilestone = {
 export const STAGE_MILESTONES: Record<Exclude<Stage, "pregnancy">, StageMilestone[]> = {
   newborn: [
     {
+      id: "newborn-pediatrician-visit",
       atWeek: 1,
       title: "First pediatrician visit",
       body: "Weight check and a first look at how feeding's going.",
     },
     {
+      id: "newborn-cord-stump",
       atWeek: 2,
       title: "Umbilical cord stump falls off",
       body: "Typically within the first couple of weeks.",
     },
     {
+      id: "newborn-6-week-checkup",
       atWeek: 6,
       title: "6-week checkup & first vaccines",
       body: "A bigger visit — growth, development, and immunizations.",
     },
     {
+      id: "newborn-first-smiles",
       atWeek: 8,
       title: "First real smiles",
       body: "Social smiling usually starts to show up around now.",
@@ -184,35 +190,51 @@ export const STAGE_MILESTONES: Record<Exclude<Stage, "pregnancy">, StageMileston
   ],
   baby: [
     {
+      id: "baby-rolling-over",
       atWeek: 17,
       title: "Rolling over",
       body: "Front-to-back and back-to-front, usually around 4 months.",
     },
     {
+      id: "baby-starting-solids",
       atWeek: 26,
       title: "Starting solids",
       body: "Most babies are ready for first foods around 6 months.",
     },
     {
+      id: "baby-crawling",
       atWeek: 39,
       title: "Crawling",
       body: "Some scoot, some crawl, some skip it entirely — all typical.",
     },
-    { atWeek: 52, title: "First steps", body: "Anywhere from 9–18 months is completely normal." },
+    {
+      id: "baby-first-steps",
+      atWeek: 52,
+      title: "First steps",
+      body: "Anywhere from 9–18 months is completely normal.",
+    },
   ],
   toddler: [
     {
+      id: "toddler-first-words",
       atWeek: 65,
       title: "First words",
       body: "A handful of clear words is typical around 15 months.",
     },
-    { atWeek: 78, title: "Running & climbing", body: "Big gross-motor leaps around 18 months." },
     {
+      id: "toddler-running-climbing",
+      atWeek: 78,
+      title: "Running & climbing",
+      body: "Big gross-motor leaps around 18 months.",
+    },
+    {
+      id: "toddler-two-word-phrases",
       atWeek: 104,
       title: "Two-word phrases",
       body: '"More milk", "go outside" — combining words around age 2.',
     },
     {
+      id: "toddler-potty-readiness",
       atWeek: 156,
       title: "Potty training readiness",
       body: "Most toddlers show signs of readiness by age 3.",
@@ -220,21 +242,25 @@ export const STAGE_MILESTONES: Record<Exclude<Stage, "pregnancy">, StageMileston
   ],
   preschool: [
     {
+      id: "preschool-pretend-play",
       atWeek: 156,
       title: "Pretend play takes off",
       body: "Imaginary friends, dress-up, elaborate storylines.",
     },
     {
+      id: "preschool-pre-writing",
       atWeek: 195,
       title: "Pre-writing skills",
       body: "Holding crayons, copying shapes, tracing letters.",
     },
     {
+      id: "preschool-multi-step-directions",
       atWeek: 234,
       title: "Following multi-step directions",
       body: '"Pick up your shoes and put them by the door."',
     },
     {
+      id: "preschool-kindergarten-readiness",
       atWeek: 260,
       title: "Kindergarten readiness",
       body: "Sharing, taking turns, and early letter/number recognition.",
