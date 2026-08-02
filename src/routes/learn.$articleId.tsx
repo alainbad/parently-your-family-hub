@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft } from "lucide-react";
-import { CATEGORY_PHOTOS, getArticleById } from "@/lib/learn-articles";
+import { CATEGORY_PHOTOS, getArticleById, type LearnArticle } from "@/lib/learn-articles";
 
 export const Route = createFileRoute("/learn/$articleId")({
   loader: ({ params }) => {
