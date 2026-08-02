@@ -9,15 +9,48 @@ export const Route = createFileRoute("/learn/$articleId")({
     if (!article) throw notFound();
     return article;
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.title} — Parently` },
-          { name: "description", content: loaderData.title },
-          { name: "robots", content: "noindex, nofollow" },
-        ]
-      : [],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) return { meta: [] };
+    const url = `https://parently-babytracking.com/learn/${loaderData.id}`;
+    return {
+      meta: [
+        { title: `${loaderData.title} — Parently` },
+        { name: "description", content: loaderData.excerpt },
+        { name: "robots", content: "index, follow" },
+        { property: "og:type", content: "article" },
+        { property: "og:title", content: loaderData.title },
+        { property: "og:description", content: loaderData.excerpt },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: loaderData.title },
+        { name: "twitter:description", content: loaderData.excerpt },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          attrs: { type: "application/ld+json" },
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: loaderData.title,
+            description: loaderData.excerpt,
+            image: "https://parently-babytracking.com/og-image.jpg",
+            articleSection: loaderData.category,
+            mainEntityOfPage: { "@type": "WebPage", "@id": url },
+            author: { "@type": "Organization", name: "Parently" },
+            publisher: {
+              "@type": "Organization",
+              name: "Parently",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://parently-babytracking.com/favicon.ico",
+              },
+            },
+          }),
+        },
+      ],
+    };
+  },
   component: ArticleScreen,
   notFoundComponent: () => (
     <div className="grid min-h-[100dvh] place-items-center bg-background px-6 text-center">
@@ -64,6 +97,7 @@ function ArticleScreen() {
           {article.title}
         </h1>
         <p className="mt-1.5 text-[12px] text-ink-soft">{article.readTime}</p>
+        <p className="mt-3 text-[14px] leading-relaxed text-ink-soft">{article.excerpt}</p>
 
         <div
           className="

@@ -9,7 +9,24 @@ import {
   type LearnCategory,
 } from "@/lib/learn-articles";
 
+const LEARN_URL = "https://parently-babytracking.com/learn";
+
 export const Route = createFileRoute("/learn/")({
+  head: () => ({
+    meta: [
+      { title: "Learn — Parently" },
+      {
+        name: "description",
+        content:
+          "Short, practical articles on pregnancy, feeding, sleep, and first aid — written for parents who need the answer, not a wall of text.",
+      },
+      { name: "robots", content: "index, follow" },
+      { property: "og:type", content: "website" },
+      { property: "og:title", content: "Learn — Parently" },
+      { property: "og:url", content: LEARN_URL },
+    ],
+    links: [{ rel: "canonical", href: LEARN_URL }],
+  }),
   component: LearnScreen,
 });
 
@@ -130,6 +147,9 @@ function LearnScreen() {
                   <h4 className="mt-1 font-display text-[16px] font-semibold leading-snug text-ink">
                     {a.title}
                   </h4>
+                  <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-ink-soft">
+                    {a.excerpt}
+                  </p>
                   <div className="mt-2 text-[12px] text-ink-soft">{a.readTime}</div>
                 </Link>
               ))}

@@ -1,9 +1,9 @@
 User-agent: *
 Allow: /
+Allow: /learn
 Disallow: /home
 Disallow: /track
 Disallow: /journey
-Disallow: /learn
 Disallow: /shop
 Disallow: /profile
 Disallow: /growth

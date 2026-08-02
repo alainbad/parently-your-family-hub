@@ -19,6 +19,7 @@ export type LearnArticle = {
   category: LearnCategory;
   tag: string;
   title: string;
+  excerpt: string;
   readTime: string;
   body: string;
 };
@@ -29,6 +30,8 @@ export const LEARN_ARTICLES: LearnArticle[] = [
     category: "Pregnancy",
     tag: "Trimester 2",
     title: "Sleeping positions that ease back pain",
+    excerpt:
+      "Why side-sleeping is recommended from the second trimester on, and simple pillow setups that make it comfortable.",
     readTime: "4 min read",
     body: `As your bump grows, lying flat on your back gets uncomfortable — and from the second trimester on, most care providers recommend avoiding it for long stretches anyway, since the weight of the uterus can press on major blood vessels.
 
@@ -57,6 +60,8 @@ If back pain is sharp, one-sided, or comes with other symptoms like fever, bleed
     category: "Pregnancy",
     tag: "Nutrition",
     title: "Iron-rich meals your partner can prep in 15 minutes",
+    excerpt:
+      "Three quick, iron-rich meals a partner can make, plus the vitamin C pairing trick that helps your body absorb it.",
     readTime: "6 min read",
     body: `Iron needs roughly double during pregnancy, and low iron is one of the most common deficiencies — fatigue often gets written off as "just pregnancy tiredness" when it's partly diet. The good news: a partner who wants to help with something concrete can genuinely move the needle here, without either of you needing to cook elaborate meals.
 
@@ -89,6 +94,8 @@ If you're feeling persistently exhausted, dizzy, or short of breath, mention it 
     category: "Pregnancy",
     tag: "Mind",
     title: "A gentle grounding practice for restless evenings",
+    excerpt:
+      "A simple 5-4-3-2-1 sensory exercise for evenings when your mind won't slow down enough to rest.",
     readTime: "3 min read",
     body: `Some evenings, the mind won't slow down — a mix of excitement, worry, physical discomfort, and just being plain tired of being tired. A short grounding practice won't fix everything, but it can take the edge off enough to actually rest.
 
@@ -121,6 +128,8 @@ Occasional restless nights are normal, especially in the third trimester. But pe
     category: "Feeding",
     tag: "Breastfeeding",
     title: "Getting a good latch: positions worth trying",
+    excerpt:
+      "How to spot a good latch, four nursing positions to try, and when it's worth calling a lactation consultant.",
     readTime: "5 min read",
     body: `A good latch is the single biggest factor in comfortable, effective feeding — and it often takes a few tries and a bit of adjusting to find what works for your body and your baby.
 
@@ -154,6 +163,8 @@ If latching consistently hurts, baby seems endlessly frustrated at the breast, o
     category: "Feeding",
     tag: "Bottle care",
     title: "Sterilizing bottles and pump parts, simplified",
+    excerpt:
+      "The simple daily wash routine for bottles and pump parts, and when full sterilizing is actually needed.",
     readTime: "4 min read",
     body: `Bottle and pump-part hygiene matters most in the early months, when a baby's immune system is still developing — but it doesn't need to be complicated.
 
@@ -190,6 +201,8 @@ If you're ever unsure whether a piece of equipment is still safe to use — crac
     category: "Feeding",
     tag: "Solids",
     title: 'Starting solids: what "ready" actually looks like',
+    excerpt:
+      "The developmental signs that actually matter more than the calendar, plus safe first foods and what to avoid.",
     readTime: "5 min read",
     body: `Most guidance points to around **6 months** as the general starting point for solids, but the calendar is only part of the picture — readiness is really about a set of developmental signs happening together.
 
@@ -229,6 +242,8 @@ Before starting solids if your baby was premature, has a diagnosed allergy risk,
     category: "Sleep",
     tag: "Safe sleep",
     title: "Safe sleep basics, in plain language",
+    excerpt:
+      "The core safe-sleep rules — back, alone, crib — and why a bare crib is safer than a cozy-looking one.",
     readTime: "4 min read",
     body: `Safe sleep guidance can feel like a long list of rules — here's the short version of what actually matters most, based on widely recommended pediatric guidance.
 
@@ -263,6 +278,8 @@ Life with a newborn is messy, and there will be nights that don't go by the book
     category: "Sleep",
     tag: "Routines",
     title: "Building a bedtime routine that actually sticks",
+    excerpt:
+      "Why consistency matters more than the exact steps, and a simple, repeatable routine to start with.",
     readTime: "5 min read",
     body: `A predictable bedtime routine doesn't guarantee an easy night, but it gives baby's body a consistent signal that sleep is coming — and that consistency tends to pay off over weeks, not days.
 
@@ -299,6 +316,8 @@ If sleep struggles come with feeding difficulties, very limited total sleep, or 
     category: "Sleep",
     tag: "Milestones",
     title: "The 4-month sleep regression, explained",
+    excerpt:
+      "Why sleep suddenly falls apart around 3-4 months, and what actually helps baby learn to resettle.",
     readTime: "4 min read",
     body: `If sleep that was starting to feel manageable suddenly falls apart around 3–4 months, you're not imagining it — and it's not something you broke.
 
@@ -328,6 +347,8 @@ Multiple wake-ups a night and shorter naps are the norm during this stretch. If 
     category: "First aid",
     tag: "Emergency",
     title: "What to do if your baby is choking",
+    excerpt:
+      "How to tell choking apart from normal gagging, and the back-blow/chest-thrust steps for babies under 1.",
     readTime: "5 min read",
     body: `This is general information, not a substitute for hands-on training — a certified infant CPR and choking course (often just a few hours, sometimes offered free through hospitals or community centers) is genuinely worth taking before you need it.
 
@@ -361,6 +382,8 @@ A real choking emergency needs emergency services and, ideally, hands you've alr
     category: "First aid",
     tag: "Illness",
     title: "Fever in babies: when to worry, when to wait",
+    excerpt:
+      "Why age matters more than the number on the thermometer, and the signs that mean don't wait to seek care.",
     readTime: "4 min read",
     body: `A fever itself isn't dangerous — it's usually a sign the immune system is doing its job. What matters most is baby's age and how they're acting alongside the number on the thermometer.
 
@@ -397,6 +420,8 @@ When in doubt, call. Pediatric offices field fever questions constantly, and a q
     category: "First aid",
     tag: "Guidance",
     title: "Signs that mean it's time to call the pediatrician",
+    excerpt:
+      "A same-day-call checklist, an ER checklist, and why your own instincts are worth trusting too.",
     readTime: "4 min read",
     body: `New parents often worry about "bothering" their pediatrician's office with small questions — but a quick call is exactly what that office is there for, and it's always better than guessing on something that turns out to matter.
 
