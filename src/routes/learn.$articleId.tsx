@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft } from "lucide-react";
-import { CATEGORY_PHOTOS, getArticleById } from "@/lib/learn-articles";
+import { CATEGORY_PHOTOS, getArticleById, type LearnArticle } from "@/lib/learn-articles";
 
 export const Route = createFileRoute("/learn/$articleId")({
   loader: ({ params }) => {
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/learn/$articleId")({
 });
 
 function ArticleScreen() {
-  const article = Route.useLoaderData();
+  const article = Route.useLoaderData() as LearnArticle;
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background">
