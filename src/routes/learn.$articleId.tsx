@@ -65,7 +65,7 @@ export const Route = createFileRoute("/learn/$articleId")({
 });
 
 function ArticleScreen() {
-  const article = Route.useLoaderData();
+  const article = Route.useLoaderData() as LearnArticle;
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background">
