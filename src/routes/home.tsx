@@ -35,7 +35,6 @@ const QUICK_ACTIONS: Array<{
 function HomeScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
-  const heroPhoto = theme === "neutral" ? PREGNANCY_PHOTO : THEME_PHOTOS[theme];
 
   const logsQuery = useQuery(todaysLogsQuery(user?.id));
   const profile = useQuery(profileQuery(user?.id));
@@ -45,6 +44,11 @@ function HomeScreen() {
   const hero = stageAnswers
     ? stageHeroLine(stageAnswers.stage, stageAnswers.dueDate, stageAnswers.birthDate)
     : null;
+  // Pregnancy photo only while actually pregnant — once baby's born, the
+  // hero should show a baby (by gender theme), not the belly photo, no
+  // matter what theme was picked.
+  const heroPhoto =
+    !stageAnswers || stageAnswers.stage === "pregnancy" ? PREGNANCY_PHOTO : THEME_PHOTOS[theme];
 
   const countByKind = (kind: QuickLogKind) =>
     logsQuery.data?.filter((l) => l.kind === kind).length ?? 0;

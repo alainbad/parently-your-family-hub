@@ -5,7 +5,7 @@ import { ArrowLeft, Camera, Check, Copy, Loader2, LogOut, User, Users } from "lu
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { profileQuery, useSaveProfile, type Profile } from "@/lib/profile";
-import { STAGES, type Stage } from "@/lib/baby-stage";
+import { deriveStage, STAGES, type Stage } from "@/lib/baby-stage";
 import { getErrorMessage } from "@/lib/errors";
 import {
   acceptHouseholdInvite,
@@ -181,13 +181,17 @@ function StageSection({
   userId: string;
   profile: Profile | null | undefined;
 }) {
-  const [stage, setStage] = useState<Stage>(profile?.stage ?? "pregnancy");
+  const [stage, setStage] = useState<Stage>(
+    deriveStage(profile?.stage ?? "pregnancy", profile?.birth_date),
+  );
   const [dueDate, setDueDate] = useState(profile?.due_date ?? "");
   const [birthDate, setBirthDate] = useState(profile?.birth_date ?? "");
   const save = useSaveProfile(userId);
 
   useEffect(() => {
-    if (profile?.stage) setStage(profile.stage);
+    // Re-derive from age rather than trusting the stored stage verbatim —
+    // it can go stale as baby grows past the bucket it was last set to.
+    if (profile?.stage) setStage(deriveStage(profile.stage, profile.birth_date));
     setDueDate(profile?.due_date ?? "");
     setBirthDate(profile?.birth_date ?? "");
   }, [profile?.stage, profile?.due_date, profile?.birth_date]);
