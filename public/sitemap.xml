@@ -11,6 +11,16 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://parently-babytracking.com/privacy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://parently-babytracking.com/support</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://parently-babytracking.com/learn/sleeping-positions-back-pain</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
