@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as HomeRouteImport } from './routes/home'
@@ -32,6 +34,11 @@ const TrackRoute = TrackRouteImport.update({
   path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -40,6 +47,11 @@ const ShopRoute = ShopRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -123,8 +135,10 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
+  '/support': typeof SupportRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
   '/learn/$articleId': typeof LearnArticleIdRoute
@@ -142,8 +156,10 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
+  '/support': typeof SupportRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
   '/learn/$articleId': typeof LearnArticleIdRoute
@@ -162,8 +178,10 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/journey': typeof JourneyRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
+  '/support': typeof SupportRoute
   '/track': typeof TrackRoute
   '/api/chat': typeof ApiChatRoute
   '/learn/$articleId': typeof LearnArticleIdRoute
@@ -183,8 +201,10 @@ export interface FileRouteTypes {
     | '/home'
     | '/journey'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/shop'
+    | '/support'
     | '/track'
     | '/api/chat'
     | '/learn/$articleId'
@@ -202,8 +222,10 @@ export interface FileRouteTypes {
     | '/home'
     | '/journey'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/shop'
+    | '/support'
     | '/track'
     | '/api/chat'
     | '/learn/$articleId'
@@ -221,8 +243,10 @@ export interface FileRouteTypes {
     | '/home'
     | '/journey'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/shop'
+    | '/support'
     | '/track'
     | '/api/chat'
     | '/learn/$articleId'
@@ -241,8 +265,10 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   JourneyRoute: typeof JourneyRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ShopRoute: typeof ShopRoute
+  SupportRoute: typeof SupportRoute
   TrackRoute: typeof TrackRoute
   ApiChatRoute: typeof ApiChatRoute
   LearnArticleIdRoute: typeof LearnArticleIdRoute
@@ -260,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop': {
       id: '/shop'
       path: '/shop'
@@ -272,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -385,8 +425,10 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   JourneyRoute: JourneyRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ShopRoute: ShopRoute,
+  SupportRoute: SupportRoute,
   TrackRoute: TrackRoute,
   ApiChatRoute: ApiChatRoute,
   LearnArticleIdRoute: LearnArticleIdRoute,
