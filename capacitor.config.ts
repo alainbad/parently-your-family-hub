@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.parently.app",
+  appId: "com.parentlybabytracking.app",
   appName: "Parently",
   webDir: ".output/public",
   // The app is server-rendered (TanStack Start + Nitro), so there's no static
