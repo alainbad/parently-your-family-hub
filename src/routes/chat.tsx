@@ -50,7 +50,7 @@ function ChatScreen() {
     setPurchasing(false);
     if (res.status === "success") {
       setEntitled(res.entitled);
-      toast.success("Welcome to Nurture AI!");
+      toast.success("Welcome to Parently AI!");
     } else if (res.status === "cancelled") {
       // silent
     } else if (res.status === "error") {
@@ -76,7 +76,7 @@ function ChatScreen() {
     <AppShell>
       <ScreenHeader
         eyebrow="Premium"
-        title="Ask Nurture AI"
+        title="Ask Parently AI"
         subtitle="Your always-on parenting companion"
         right={
           <Link
@@ -100,7 +100,7 @@ function ChatScreen() {
                 Premium feature
               </div>
               <h2 className="mt-4 font-display text-2xl font-semibold text-ink">
-                Unlock Nurture AI
+                Unlock Parently AI
               </h2>
               <p className="mt-2 text-sm text-ink-soft">
                 A calm, expert-backed voice whenever you need it — day or night.
@@ -190,7 +190,7 @@ function UnlockedPlaceholder() {
         Unlocked
       </div>
       <h2 className="mt-4 font-display text-2xl font-semibold text-ink">
-        Nurture AI is ready
+        Parently AI is ready
       </h2>
       <p className="mt-2 text-sm text-ink-soft">
         Ask about sleep, feeding, symptoms, milestones, or anything on your mind.
@@ -200,7 +200,7 @@ function UnlockedPlaceholder() {
         className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-float active:scale-[0.98]"
       >
         <MessageSquare className="h-4 w-4" />
-        Open Nurture chat
+        Open Parently AI chat
       </Link>
       {dev ? (
         <button
