@@ -1,7 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 
 // Product identifiers — must match App Store Connect + Google Play Console listings.
-export const AI_CHAT_MONTHLY_PRODUCT_ID = "nurture_ai_chat_monthly";
+export const AI_CHAT_MONTHLY_PRODUCT_ID = "parently_ai_chat_monthly";
 export const AI_CHAT_ENTITLEMENT_ID = "ai_chat";
 
 // RevenueCat public API keys (safe to embed in the app binary — RevenueCat design).
