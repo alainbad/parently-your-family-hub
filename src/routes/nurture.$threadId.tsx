@@ -85,7 +85,7 @@ function ChatShell({
         </Link>
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Nurture AI
+            Parently AI
           </p>
           <h1 className="truncate font-display text-base font-semibold text-ink">
             Ask anything
@@ -171,7 +171,7 @@ function ChatWindow({
           })}
           {status === "submitted" ? (
             <div className="flex justify-start">
-              <Shimmer>Nurture is thinking…</Shimmer>
+              <Shimmer>Parently AI is thinking…</Shimmer>
             </div>
           ) : null}
         </ConversationContent>
@@ -182,7 +182,7 @@ function ChatWindow({
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputTextarea
             ref={textareaRef}
-            placeholder="Ask Nurture…"
+            placeholder="Ask Parently AI…"
             autoFocus
           />
           <PromptInputFooter className="justify-end">

@@ -73,7 +73,7 @@ export function BottomNav() {
 
           <Link
             to="/chat"
-            aria-label="Ask Nurture AI"
+            aria-label="Ask Parently AI"
             className="absolute left-1/2 top-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 -mt-3 place-items-center rounded-full bg-primary text-primary-foreground shadow-float ring-4 ring-background transition-transform active:scale-95"
           >
             <Sparkles className="h-6 w-6" />

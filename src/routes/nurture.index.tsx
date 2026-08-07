@@ -32,7 +32,7 @@ function NurtureThreads() {
   if (!loading && !user) {
     return (
       <AppShell>
-        <ScreenHeader title="Ask Nurture AI" />
+        <ScreenHeader title="Ask Parently AI" />
         <div className="px-6 text-sm text-ink-soft">
           <Link to="/auth" className="font-semibold text-primary">
             Sign in
@@ -47,7 +47,7 @@ function NurtureThreads() {
     <AppShell>
       <ScreenHeader
         eyebrow="Premium"
-        title="Nurture AI"
+        title="Parently AI"
         subtitle="Your parenting conversations"
         right={
           <Link
