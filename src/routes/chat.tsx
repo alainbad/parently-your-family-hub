@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import {
+  APP_REVIEW_DEMO_EMAIL,
   getDevUnlock,
   hasAiChatEntitlement,
   identifyUser,
@@ -31,6 +32,7 @@ function ChatScreen() {
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const native = isNativeApp();
+  const isAppReviewAccount = user?.email === APP_REVIEW_DEMO_EMAIL;
 
   useEffect(() => {
     if (!user) return;
@@ -124,9 +126,7 @@ function ChatScreen() {
                     $2.99<span className="text-xs font-medium text-ink-soft">/mo</span>
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-ink-soft">
-                  Cancel anytime · 7-day free trial
-                </p>
+                <p className="mt-1 text-xs text-ink-soft">Cancel anytime · 7-day free trial</p>
               </div>
 
               <button
@@ -157,15 +157,19 @@ function ChatScreen() {
                 Restore purchase
               </button>
 
-              {!native ? (
+              {!native || isAppReviewAccount ? (
                 <div className="mt-3 rounded-xl bg-background/60 p-3 text-center text-[11px] text-muted-foreground">
-                  <p>Preview mode — purchases run inside the iOS/Android app build.</p>
+                  <p>
+                    {native
+                      ? "App Review demo account — unlock without a purchase."
+                      : "Preview mode — purchases run inside the iOS/Android app build."}
+                  </p>
                   <button
                     type="button"
                     onClick={() => {
                       setDevUnlock(true);
                       setEntitled(true);
-                      toast.success("Preview unlocked.");
+                      toast.success(native ? "Demo account unlocked." : "Preview unlocked.");
                     }}
                     className="mt-2 text-primary underline"
                   >
@@ -189,9 +193,7 @@ function UnlockedPlaceholder() {
         <Sparkles className="h-3.5 w-3.5" />
         Unlocked
       </div>
-      <h2 className="mt-4 font-display text-2xl font-semibold text-ink">
-        Parently AI is ready
-      </h2>
+      <h2 className="mt-4 font-display text-2xl font-semibold text-ink">Parently AI is ready</h2>
       <p className="mt-2 text-sm text-ink-soft">
         Ask about sleep, feeding, symptoms, milestones, or anything on your mind.
       </p>

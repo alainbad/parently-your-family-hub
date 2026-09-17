@@ -17,8 +17,7 @@ async function loadPurchases(): Promise<PurchasesModule | null> {
   if (!Capacitor.isNativePlatform()) return null;
   if (!purchasesPromise) {
     purchasesPromise = import("@revenuecat/purchases-capacitor").then(async (mod) => {
-      const key =
-        Capacitor.getPlatform() === "ios" ? REVENUECAT_APPLE_KEY : REVENUECAT_GOOGLE_KEY;
+      const key = Capacitor.getPlatform() === "ios" ? REVENUECAT_APPLE_KEY : REVENUECAT_GOOGLE_KEY;
       await mod.Purchases.configure({ apiKey: key });
       return mod;
     });
@@ -31,6 +30,11 @@ export async function identifyUser(userId: string): Promise<void> {
   if (!mod) return;
   await mod.Purchases.logIn({ appUserID: userId });
 }
+
+// Apple/Google App Review sign in with this account. RevenueCat isn't wired up
+// with real keys yet, so this lets review unlock the paid AI chat screen
+// without a real purchase — scoped to this one email, not a general bypass.
+export const APP_REVIEW_DEMO_EMAIL = "badranalain87+applereview@gmail.com";
 
 const DEV_UNLOCK_KEY = "nurture_dev_unlock";
 
