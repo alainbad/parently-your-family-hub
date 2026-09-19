@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useRef, useState, useEffect } from "react";
-import { ArrowLeft, Camera, Check, Copy, Loader2, LogOut, User, Users } from "lucide-react";
+import { ArrowLeft, Camera, Check, Copy, Loader2, LogOut, Trash2, User, Users } from "lucide-react";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
+import { deleteMyAccount } from "@/lib/account";
 import { profileQuery, useSaveProfile, type Profile } from "@/lib/profile";
 import { deriveStage, STAGES, type Stage } from "@/lib/baby-stage";
 import { getErrorMessage } from "@/lib/errors";
@@ -28,6 +29,13 @@ function ProfileScreen() {
 
   const { data: profile, isLoading } = useQuery(profileQuery(user?.id));
   const save = useSaveProfile(user?.id);
+  const deleteAccount = useMutation({
+    mutationFn: () => deleteMyAccount(),
+    onSuccess: async () => {
+      await signOut();
+      navigate({ to: "/home" });
+    },
+  });
 
   useEffect(() => {
     if (profile?.baby_name) setBabyName(profile.baby_name);
@@ -169,6 +177,29 @@ function ProfileScreen() {
           <LogOut className="h-4 w-4" />
           Sign out
         </button>
+
+        <button
+          onClick={() => {
+            const confirmed = window.confirm(
+              "Delete your account? This permanently removes your profile, logs, and chat history. This can't be undone.",
+            );
+            if (confirmed) deleteAccount.mutate();
+          }}
+          disabled={deleteAccount.isPending}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-destructive/30 bg-destructive/5 text-[13px] font-semibold text-destructive disabled:opacity-50"
+        >
+          {deleteAccount.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+          Delete account
+        </button>
+        {deleteAccount.isError ? (
+          <p className="text-center text-[12px] text-destructive">
+            {getErrorMessage(deleteAccount.error, "Could not delete your account. Try again.")}
+          </p>
+        ) : null}
       </div>
     </AppShell>
   );
