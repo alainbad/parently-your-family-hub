@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useRef, useState, useEffect } from "react";
 import { ArrowLeft, Camera, Check, Copy, Loader2, LogOut, User, Users } from "lucide-react";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { profileQuery, useSaveProfile, type Profile } from "@/lib/profile";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/profile")({
 
 function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const [accountDeleted, setAccountDeleted] = useState(false);
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [babyName, setBabyName] = useState("");
@@ -38,6 +40,26 @@ function ProfileScreen() {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
+
+  if (accountDeleted) {
+    return (
+      <AppShell>
+        <ScreenHeader
+          eyebrow="Account"
+          title="Account deleted"
+          subtitle="Your account and associated personal data have been deleted. You are signed out."
+        />
+        <div className="px-6">
+          <Link
+            to="/home"
+            className="inline-flex rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground"
+          >
+            Back to home
+          </Link>
+        </div>
+      </AppShell>
+    );
+  }
 
   if (!user) {
     return (
@@ -158,6 +180,8 @@ function ProfileScreen() {
         <StageSection userId={user.id} profile={profile} />
 
         <FamilySharingSection />
+
+        <DeleteAccountSection onDeleted={() => setAccountDeleted(true)} />
 
         <button
           onClick={async () => {

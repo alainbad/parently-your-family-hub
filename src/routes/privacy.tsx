@@ -35,7 +35,7 @@ function PrivacyPolicy() {
       <h1 className="mt-6 font-display text-[26px] font-semibold leading-[1.15] text-ink">
         Privacy Policy
       </h1>
-      <p className="mt-2 text-[13px] text-ink-soft">Last updated: August 2026</p>
+      <p className="mt-2 text-[13px] text-ink-soft">Last updated: October 2026</p>
 
       <div className="mt-6 flex flex-col gap-6 text-[14.5px] leading-relaxed text-ink">
         <p>
@@ -127,12 +127,18 @@ function PrivacyPolicy() {
           <h2 className="font-display text-[17px] font-semibold text-ink">Your choices</h2>
           <p className="mt-2">
             You can edit or delete individual logs, reminders, and milestones at any time in the
-            app. To request a full export or deletion of your account and all associated data, email
-            us at{" "}
+            app. To permanently delete your account, open Profile, choose Delete Account, and
+            complete the confirmation. This removes your profile, uploaded baby photos, logs,
+            reminders, growth records, milestones, AI conversations and family membership. If you
+            own a family group, it and its invitations are removed. Other members keep their
+            accounts and records they created. Deletion cannot be undone. To request a full export,
+            email us at{" "}
             <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-primary">
               {CONTACT_EMAIL}
             </a>{" "}
-            and we'll process it promptly.
+            and we'll process it promptly. Account deletion does not cancel App Store or Google Play
+            subscriptions; manage these through your store account. Payment providers may retain
+            transaction records under their own retention requirements.
           </p>
         </section>
 
