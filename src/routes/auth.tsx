@@ -13,7 +13,7 @@ function AuthScreen() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busyAction, setBusyAction] = useState<"google" | "email" | null>(null);
+  const [busyAction, setBusyAction] = useState<"google" | "apple" | "email" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { session, loading } = useAuth();
@@ -46,17 +46,17 @@ function AuthScreen() {
     }
   };
 
-  const google = async () => {
-    setBusyAction("google");
+  const signInWithProvider = async (provider: "google" | "apple") => {
+    setBusyAction(provider);
     setError(null);
     try {
       if (isEmbeddedPreview()) {
-        await signInWithGooglePopupFallback();
+        await signInWithPopupFallback(provider);
         navigate({ to: "/", replace: true });
         return;
       }
 
-      const res = await lovable.auth.signInWithOAuth("google", {
+      const res = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: `${window.location.origin}/auth-callback`,
         extraParams: { prompt: "select_account" },
       });
@@ -66,14 +66,17 @@ function AuthScreen() {
 
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
-      if (!data.session) throw new Error("Google sign-in finished, but no session was saved.");
+      if (!data.session) throw new Error(`${provider === "apple" ? "Apple" : "Google"} sign-in finished, but no session was saved.`);
 
       navigate({ to: "/", replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Google sign-in failed");
+      setError(err instanceof Error ? err.message : `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
       setBusyAction(null);
     }
   };
+
+  const google = () => signInWithProvider("google");
+  const apple = () => signInWithProvider("apple");
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background">
