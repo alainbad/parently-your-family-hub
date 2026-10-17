@@ -13,7 +13,7 @@ function AuthScreen() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busyAction, setBusyAction] = useState<"google" | "email" | null>(null);
+  const [busyAction, setBusyAction] = useState<"google" | "apple" | "email" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { session, loading } = useAuth();
@@ -46,17 +46,17 @@ function AuthScreen() {
     }
   };
 
-  const google = async () => {
-    setBusyAction("google");
+  const signInWithProvider = async (provider: "google" | "apple") => {
+    setBusyAction(provider);
     setError(null);
     try {
       if (isEmbeddedPreview()) {
-        await signInWithGooglePopupFallback();
+        await signInWithPopupFallback(provider);
         navigate({ to: "/", replace: true });
         return;
       }
 
-      const res = await lovable.auth.signInWithOAuth("google", {
+      const res = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: `${window.location.origin}/auth-callback`,
         extraParams: { prompt: "select_account" },
       });
@@ -66,14 +66,17 @@ function AuthScreen() {
 
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
-      if (!data.session) throw new Error("Google sign-in finished, but no session was saved.");
+      if (!data.session) throw new Error(`${provider === "apple" ? "Apple" : "Google"} sign-in finished, but no session was saved.`);
 
       navigate({ to: "/", replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Google sign-in failed");
+      setError(err instanceof Error ? err.message : `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
       setBusyAction(null);
     }
   };
+
+  const google = () => signInWithProvider("google");
+  const apple = () => signInWithProvider("apple");
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background">
@@ -105,6 +108,15 @@ function AuthScreen() {
         >
           {busyAction === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
           Continue with Google
+        </button>
+
+        <button
+          onClick={apple}
+          disabled={busy}
+          className="mt-3 inline-flex h-12 w-full items-center justify-center gap-3 rounded-[1rem] bg-ink text-[14px] font-semibold text-background shadow-soft transition-transform active:scale-[0.99]"
+        >
+          {busyAction === "apple" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AppleIcon />}
+          Continue with Apple
         </button>
 
         <div className="my-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
@@ -175,9 +187,9 @@ function isEmbeddedPreview() {
   }
 }
 
-async function signInWithGooglePopupFallback() {
+async function signInWithPopupFallback(provider: "google" | "apple") {
   const authUrl = new URL("/~oauth/initiate", window.location.origin);
-  authUrl.searchParams.set("provider", "google");
+  authUrl.searchParams.set("provider", provider);
   authUrl.searchParams.set("redirect_uri", `${window.location.origin}/auth-callback`);
   authUrl.searchParams.set("state", createOAuthState());
   authUrl.searchParams.set("prompt", "select_account");
@@ -227,6 +239,14 @@ function createOAuthState() {
   }
 
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+}
+
+function AppleIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
+      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+    </svg>
+  );
 }
 
 function GoogleIcon() {
