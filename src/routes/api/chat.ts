@@ -4,6 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
+import { userHasAiSubscription } from "@/lib/subscriptions.server";
+
 const SYSTEM_PROMPT = `You are Parently AI — a warm, calm, evidence-informed companion for parents from pregnancy through age 5. You draw on mainstream pediatric guidance (AAP, WHO, NHS, CDC) and lactation/sleep/developmental research.
 
 ## Voice
@@ -63,6 +65,18 @@ export const Route = createFileRoute("/api/chat")({
         const { data: userRes, error: userErr } = await supabase.auth.getUser(token);
         if (userErr || !userRes.user) return new Response("Unauthorized", { status: 401 });
         const userId = userRes.user.id;
+        try {
+          if (!(await userHasAiSubscription(userId))) {
+            return new Response(
+              "An active Parently AI subscription is required. Subscribe or restore purchases from the Premium screen.",
+              { status: 403 },
+            );
+          }
+        } catch {
+          return new Response("Subscriptions could not be verified. Please try again shortly.", {
+            status: 503,
+          });
+        }
 
         let body: { messages?: UIMessage[]; threadId?: string };
         try {
@@ -90,7 +104,8 @@ export const Route = createFileRoute("/api/chat")({
             thread_id: threadId,
             user_id: userId,
             role: "user",
-            parts: lastUser.parts as unknown as Database["public"]["Tables"]["chat_messages"]["Insert"]["parts"],
+            parts:
+              lastUser.parts as unknown as Database["public"]["Tables"]["chat_messages"]["Insert"]["parts"],
           });
         }
 
@@ -102,10 +117,7 @@ export const Route = createFileRoute("/api/chat")({
             .trim()
             .slice(0, 60);
           if (text) {
-            await supabase
-              .from("chat_threads")
-              .update({ title: text })
-              .eq("id", threadId);
+            await supabase.from("chat_threads").update({ title: text }).eq("id", threadId);
           }
         }
 
@@ -121,15 +133,14 @@ export const Route = createFileRoute("/api/chat")({
         return result.toUIMessageStreamResponse({
           originalMessages: messages,
           onFinish: async ({ messages: finalMessages }) => {
-            const lastAssistant = [...finalMessages]
-              .reverse()
-              .find((m) => m.role === "assistant");
+            const lastAssistant = [...finalMessages].reverse().find((m) => m.role === "assistant");
             if (!lastAssistant) return;
             await supabase.from("chat_messages").insert({
               thread_id: threadId,
               user_id: userId,
               role: "assistant",
-              parts: lastAssistant.parts as unknown as Database["public"]["Tables"]["chat_messages"]["Insert"]["parts"],
+              parts:
+                lastAssistant.parts as unknown as Database["public"]["Tables"]["chat_messages"]["Insert"]["parts"],
             });
             await supabase
               .from("chat_threads")
