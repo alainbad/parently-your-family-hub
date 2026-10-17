@@ -110,6 +110,15 @@ function AuthScreen() {
           Continue with Google
         </button>
 
+        <button
+          onClick={apple}
+          disabled={busy}
+          className="mt-3 inline-flex h-12 w-full items-center justify-center gap-3 rounded-[1rem] bg-ink text-[14px] font-semibold text-background shadow-soft transition-transform active:scale-[0.99]"
+        >
+          {busyAction === "apple" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AppleIcon />}
+          Continue with Apple
+        </button>
+
         <div className="my-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
           <span className="h-px flex-1 bg-border" />
           or
@@ -178,9 +187,9 @@ function isEmbeddedPreview() {
   }
 }
 
-async function signInWithGooglePopupFallback() {
+async function signInWithPopupFallback(provider: "google" | "apple") {
   const authUrl = new URL("/~oauth/initiate", window.location.origin);
-  authUrl.searchParams.set("provider", "google");
+  authUrl.searchParams.set("provider", provider);
   authUrl.searchParams.set("redirect_uri", `${window.location.origin}/auth-callback`);
   authUrl.searchParams.set("state", createOAuthState());
   authUrl.searchParams.set("prompt", "select_account");
