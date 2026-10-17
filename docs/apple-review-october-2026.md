@@ -4,7 +4,7 @@ Review rejected version 1.0 (1). This branch prepares build 2; choose a higher n
 
 ## Implemented
 
-- Apple and Google OAuth use Supabase PKCE; iOS presents ASWebAuthenticationSession through a local Capacitor plugin, rather than launching the default browser. Email login and registration remain inside the app.
+- Web Apple and Google OAuth use the Lovable Cloud broker matching the saved provider configuration. The draft iOS implementation still uses direct Supabase PKCE through ASWebAuthenticationSession and is NOT compatible with the configured broker yet. Do not merge or deploy this branch until native authentication has been adapted and tested. Email login and registration remain inside the app.
 - Apple login button, exact callback validation, native plugin registration, callback URL scheme, and email confirmation feedback.
 - RevenueCat keys read from environment; initialization failures are caught and can be retried. Purchase and restore actions handle setup errors.
 - Storefront price replaces the hardcoded price. Subscribe does not promise an unverified free trial; Apple displays eligible offers before confirmation. Added renewal disclosure, terms, privacy, restore, and loading/error states.
@@ -12,9 +12,9 @@ Review rejected version 1.0 (1). This branch prepares build 2; choose a higher n
 
 ## Required configuration before deployment
 
-1. In Supabase Auth enable BOTH Google and Apple providers. This branch replaces the Lovable Google proxy with direct Supabase OAuth; do not deploy before Google credentials are configured.
+1. Apple and Google are enabled in Lovable Cloud. Apple uses Services ID `com.parentlybabytracking.app.web`, team `CK3N6ZTEN8`, key ID `AR6BG232HU`. The user generated and saved the client secret on 2026-10-17. Keep the private key out of this repository. Verify end-to-end login; an enabled provider alone does not prove credential validity.
 2. Allow redirect URLs `com.parentlybabytracking.app://auth/callback` and `https://parently-babytracking.com/auth-callback`. Add the exact staging callback when testing staging.
-3. Configure Apple's Services ID, associated primary App ID, web domain, key and signed client secret. Apple's return URL is `https://emyrcjsikkdnublfudmj.supabase.co/auth/v1/callback`. Track client-secret expiration. Configure Google's redirect to that same Supabase callback. The native plugin intentionally permits only this project's Supabase authorize URL; update that host if using a custom Auth domain.
+3. Lovable's Apple return URLs are `https://oauth.lovable.app/callback`, `https://parently-babytracker.lovable.app/~oauth/callback`, `https://parently-babytracking.com/~oauth/callback`, and `https://www.parently-babytracking.com/~oauth/callback`. These were prepared in Apple Developer and the user reported saving them. All four confirmations are checked in Lovable. The previously registered direct Supabase callback is not used by the web broker. Adapt the native bridge to a supported broker return flow with state validation and a secure session handoff; do not assume the broker accepts arbitrary custom schemes or returns a Supabase PKCE code. Track client-secret expiration and regenerate before six months.
 4. **Apple account-deletion token revocation remains unimplemented.** Before releasing Apple login, implement secure server-side retention of the Apple provider refresh token associated with the verified user and revoke through Apple's `/auth/revoke` before completing account deletion. Do not put Apple private keys or provider refresh tokens in client code or public tables. Existing account deletion removes app data/Auth but does not revoke Apple authorization. Verify hide-email, subsequent logins and deletion from another device.
 5. Set `VITE_REVENUECAT_APPLE_API_KEY` to the real Apple SDK public key (`appl_...`) in the web build environment. For Android set `VITE_REVENUECAT_GOOGLE_API_KEY`. Set `REVENUECAT_SECRET_API_KEY` only in the server runtime environment, with access to RevenueCat v1 subscriber information. Without it AI requests return 503; never prefix this secret with VITE.
 6. In RevenueCat connect the correct App Store app, configure Apple service credentials, import `parently_ai_chat_monthly`, attach it to entitlement `ai_chat`, and include it in the current offering. SDK app user IDs are Supabase user UUIDs.
@@ -30,4 +30,4 @@ Review rejected version 1.0 (1). This branch prepares build 2; choose a higher n
 
 ## Access limitations
 
-GitHub access works. The connected Lovable account returned `project_not_found` for this project, and the previously connected Supabase accounts did not have project permission. Apple/RevenueCat dashboard configuration and native device testing were not available in this workspace.
+GitHub access works. Browser access to Lovable works under `alainbadran2021@outlook.com`; the connector is linked to a different account and cannot access this project. Apple Developer setup is accessible through the browser. RevenueCat configuration and native device testing remain unverified.

@@ -46,7 +46,7 @@ function AuthCallback() {
       }
 
       if (!cancelled) {
-        setError("Google sign-in completed, but the session could not be restored.");
+        setError("Sign-in completed, but the session could not be restored.");
       }
     }
 

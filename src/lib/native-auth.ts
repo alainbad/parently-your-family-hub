@@ -1,5 +1,6 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 
 const NativeAuth = registerPlugin<{ start(options: { url: string }): Promise<{ url: string }> }>(
   "NativeAuth",
@@ -8,6 +9,16 @@ const CALLBACK = "com.parentlybabytracking.app://auth/callback";
 
 export async function signInWithProvider(provider: "google" | "apple") {
   const ios = Capacitor.getPlatform() === "ios";
+  // Lovable Cloud providers are configured at its OAuth broker, not at the
+  // project's direct Supabase authorize endpoint.
+  if (!ios) {
+    const result = await lovable.auth.signInWithOAuth(provider, {
+      redirect_uri: `${window.location.origin}/auth-callback`,
+      ...(provider === "google" ? { extraParams: { prompt: "select_account" } } : {}),
+    });
+    if (result.error) throw result.error;
+    return;
+  }
   if (ios && !Capacitor.isPluginAvailable("NativeAuth")) {
     throw new Error("Please update Parently to use secure sign-in, or sign in with email.");
   }
