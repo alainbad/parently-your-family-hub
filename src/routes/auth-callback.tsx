@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { restoreOAuthSessionFromUrl } from "@/lib/auth-redirect";
+import { useEffect } from "react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth-callback")({
   head: () => ({
@@ -17,45 +16,16 @@ export const Route = createFileRoute("/auth-callback")({
 
 function AuthCallback() {
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const { session, isReady, authError } = useAuth();
+  const error = isReady
+    ? (authError ?? (!session ? "Sign-in completed, but the session could not be restored." : null))
+    : null;
 
+  // AuthProvider owns the exchange. A second exchange here would consume a
+  // one-use PKCE code twice and race the root session initialization.
   useEffect(() => {
-    let cancelled = false;
-
-    async function finishSignIn() {
-      const restored = await restoreOAuthSessionFromUrl();
-      if (cancelled) return;
-      if (restored.error) {
-        setError(restored.error);
-        return;
-      }
-      if (restored.session) {
-        navigate({ to: "/", replace: true });
-        return;
-      }
-
-      const { data, error } = await supabase.auth.getSession();
-      if (cancelled) return;
-      if (error) {
-        setError(error.message);
-        return;
-      }
-      if (data.session) {
-        navigate({ to: "/", replace: true });
-        return;
-      }
-
-      if (!cancelled) {
-        setError("Sign-in completed, but the session could not be restored.");
-      }
-    }
-
-    finishSignIn();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate]);
+    if (isReady && session && !authError) void navigate({ to: "/", replace: true });
+  }, [isReady, session, authError, navigate]);
 
   return (
     <main className="grid min-h-[100dvh] place-items-center bg-background px-6 text-center">

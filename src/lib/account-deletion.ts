@@ -32,5 +32,12 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
         "Deletion could not finish. Some data may already have been removed. Please retry; if your session expired, sign in again first.",
       );
     }
-    return { deleted: true };
+    // The broker does not expose Apple's provider token. Do not block deletion
+    // when automatic revocation is unavailable (Apple TN3194 fallback).
+    const appleDisconnectRequired =
+      data.user.identities?.some((identity) => identity.provider === "apple") === true ||
+      data.user.app_metadata?.provider === "apple" ||
+      (Array.isArray(data.user.app_metadata?.providers) &&
+        data.user.app_metadata.providers.includes("apple"));
+    return { deleted: true, appleDisconnectRequired };
   });

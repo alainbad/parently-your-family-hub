@@ -8,6 +8,23 @@ public class NativeAuthPlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationP
     public let pluginMethods: [CAPPluginMethod] = [CAPPluginMethod(name: "start", returnType: CAPPluginReturnPromise)]
     private var session: ASWebAuthenticationSession?
     private var anchor: UIWindow?
+    private var revocationObserver: NSObjectProtocol?
+
+    public override func load() {
+        revocationObserver = NotificationCenter.default.addObserver(
+            forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.notifyListeners("appleCredentialRevoked", data: [:], retainUntilConsumed: true)
+        }
+    }
+
+    deinit {
+        if let observer = revocationObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 
     @objc func start(_ call: CAPPluginCall) {
         DispatchQueue.main.async {

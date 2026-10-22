@@ -1,10 +1,20 @@
-import { Capacitor, registerPlugin } from "@capacitor/core";
+import { Capacitor, registerPlugin, type PluginListenerHandle } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
-const NativeAuth = registerPlugin<{ start(options: { url: string }): Promise<{ url: string }> }>(
-  "NativeAuth",
-);
+const NativeAuth = registerPlugin<{
+  start(options: { url: string }): Promise<{ url: string }>;
+  addListener(event: "appleCredentialRevoked", callback: () => void): Promise<PluginListenerHandle>;
+}>("NativeAuth");
+
+export async function observeAppleRevocation(callback: () => void): Promise<() => void> {
+  if (Capacitor.getPlatform() !== "ios" || !Capacitor.isPluginAvailable("NativeAuth"))
+    return () => {};
+  const listener = await NativeAuth.addListener("appleCredentialRevoked", callback);
+  return () => {
+    void listener.remove();
+  };
+}
 import { nativeCallbackTokens, nativeLoginUrl } from "./native-auth-protocol";
 
 export async function signInWithProvider(provider: "google" | "apple") {

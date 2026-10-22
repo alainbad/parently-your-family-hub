@@ -15,7 +15,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { clearLocalStageAnswers } from "@/lib/baby-stage";
 import { getErrorMessage } from "@/lib/errors";
 
-export function DeleteAccountSection({ onDeleted }: { onDeleted: () => void }) {
+export function DeleteAccountSection({
+  onDeleted,
+}: {
+  onDeleted: (appleDisconnectRequired: boolean) => void;
+}) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
@@ -30,7 +34,7 @@ export function DeleteAccountSection({ onDeleted }: { onDeleted: () => void }) {
     setPending(true);
     setError(null);
     try {
-      await deleteMyAccount({ data: { confirmation: "DELETE" } });
+      const result = await deleteMyAccount({ data: { confirmation: "DELETE" } });
       // Clear cached child data before auth changes unmount the profile.
       await qc.cancelQueries();
       qc.clear();
@@ -42,7 +46,7 @@ export function DeleteAccountSection({ onDeleted }: { onDeleted: () => void }) {
       }
       // Keep the confirmation visible even when the auth provider removes the user.
       setDeleted(true);
-      onDeleted();
+      onDeleted(result.appleDisconnectRequired);
       await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
     } catch (e) {
       setError(getErrorMessage(e, "Deletion could not finish. Please retry."));

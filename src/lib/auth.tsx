@@ -2,20 +2,47 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { restoreOAuthSessionFromUrl } from "@/lib/auth-redirect";
+import { observeAppleRevocation } from "@/lib/native-auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
   loading: boolean;
   isReady: boolean;
+  authError: string | null;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    let removeListener: (() => void) | undefined;
+    void observeAppleRevocation(() => {
+      if (!active) return;
+      setSession(null);
+      void queryClient.cancelQueries().then(() => queryClient.clear());
+      void supabase.auth.signOut({ scope: "local" });
+    })
+      .then((remove) => {
+        if (active) removeListener = remove;
+        else remove();
+      })
+      .catch(() => {
+        /* Older native builds do not support the listener. */
+      });
+    return () => {
+      active = false;
+      removeListener?.();
+    };
+  }, [queryClient]);
 
   useEffect(() => {
     let mounted = true;
@@ -25,9 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const restored = await restoreOAuthSessionFromUrl();
       if (!mounted) return;
 
-      if (restored.error) {
-        console.error("[auth] OAuth session restore failed", restored.error);
-      }
+      setAuthError(restored.error);
 
       if (restored.session) {
         setSession(restored.session);
@@ -58,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: session?.user ?? null,
     loading: !isReady,
     isReady,
+    authError,
     signOut: async () => {
       await supabase.auth.signOut();
       setSession(null);
