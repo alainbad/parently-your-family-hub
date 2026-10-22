@@ -20,6 +20,10 @@ export async function observeAppleRevocation(callback: () => void): Promise<() =
 import { nativeCallbackTokens, nativeLoginUrl } from "./native-auth-protocol";
 
 export async function signInWithProvider(provider: "google" | "apple") {
+  if (provider === "apple" && import.meta.env.VITE_APPLE_DIRECT_AUTH_ENABLED === "true") {
+    const { directAppleSignIn } = await import("./apple-sign-in");
+    return directAppleSignIn();
+  }
   const ios = Capacitor.getPlatform() === "ios";
   // Lovable Cloud providers are configured at its OAuth broker, not at the
   // project's direct Supabase authorize endpoint.

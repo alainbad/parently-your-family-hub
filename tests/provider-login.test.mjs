@@ -6,7 +6,7 @@ import ts from "typescript";
 const source = ts.transpileModule(
   readFileSync(new URL("../src/lib/native-auth.ts", import.meta.url), "utf8"),
   { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } },
-).outputText;
+).outputText.replace("import.meta.env.VITE_APPLE_DIRECT_AUTH_ENABLED", "false");
 function harness(result, setSession) {
   const exports = {};
   vm.runInNewContext(source, {
