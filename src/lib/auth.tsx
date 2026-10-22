@@ -46,29 +46,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    let unsubscribe: (() => void) | undefined;
 
     async function hydrateSession() {
-      const restored = await restoreOAuthSessionFromUrl();
-      if (!mounted) return;
-
-      setAuthError(restored.error);
-
-      if (restored.session) {
-        setSession(restored.session);
-      } else {
-        const { data } = await supabase.auth.getSession();
+      try {
+        const restored = await restoreOAuthSessionFromUrl();
         if (!mounted) return;
-        setSession(data.session);
-      }
 
-      const { data: sub } = supabase.auth.onAuthStateChange((event, nextSession) => {
-        if (event === "INITIAL_SESSION") return;
-        setSession(nextSession);
-      });
-      unsubscribe = () => sub.subscription.unsubscribe();
-      setIsReady(true);
+        setAuthError(restored.error);
+
+        if (restored.session) {
+          setSession(restored.session);
+        } else {
+          const { data, error } = await supabase.auth.getSession();
+          if (error) throw error;
+          if (!mounted) return;
+          setSession(data.session);
+        }
+      } catch {
+        if (!mounted) return;
+        setSession(null);
+        setAuthError("Your session could not be restored. Please sign in again.");
+      } finally {
+        if (mounted) setIsReady(true);
+      }
     }
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "INITIAL_SESSION") return;
+      if (!mounted) return;
+      setSession(nextSession);
+      if (nextSession) setAuthError(null);
+    });
+    const unsubscribe = () => sub.subscription.unsubscribe();
 
     void hydrateSession();
 
@@ -85,7 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isReady,
     authError,
     signOut: async () => {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      await queryClient.cancelQueries();
+      queryClient.clear();
       setSession(null);
     },
   };

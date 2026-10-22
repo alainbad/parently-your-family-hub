@@ -1,6 +1,8 @@
 import { Capacitor, registerPlugin, type PluginListenerHandle } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
+
+const lovableAuth = createLovableAuth();
 
 const NativeAuth = registerPlugin<{
   start(options: { url: string }): Promise<{ url: string }>;
@@ -22,11 +24,15 @@ export async function signInWithProvider(provider: "google" | "apple") {
   // Lovable Cloud providers are configured at its OAuth broker, not at the
   // project's direct Supabase authorize endpoint.
   if (!ios) {
-    const result = await lovable.auth.signInWithOAuth(provider, {
+    const result = await lovableAuth.signInWithOAuth(provider, {
       redirect_uri: `${window.location.origin}/auth-callback`,
       ...(provider === "google" ? { extraParams: { prompt: "select_account" } } : {}),
     });
     if (result.error) throw result.error;
+    if (result.redirected) return;
+    const { data, error } = await supabase.auth.setSession(result.tokens);
+    if (error) throw error;
+    if (!data.session) throw new Error("Sign-in did not create a session. Please try again.");
     return;
   }
   if (ios && !Capacitor.isPluginAvailable("NativeAuth")) {
