@@ -5,8 +5,9 @@ export const AI_CHAT_MONTHLY_PRODUCT_ID = "parently_ai_chat_monthly";
 export const AI_CHAT_ENTITLEMENT_ID = "ai_chat";
 
 // RevenueCat public API keys (safe to embed in the app binary — RevenueCat design).
-// Add real values once the RevenueCat project is created.
-const REVENUECAT_APPLE_KEY = import.meta.env.VITE_REVENUECAT_APPLE_API_KEY ?? "";
+// The default belongs to Parently (App Store); staging can override it at build time.
+const REVENUECAT_APPLE_KEY =
+  import.meta.env.VITE_REVENUECAT_APPLE_API_KEY ?? "appl_sLGVNLgmhcPlAACtpjAYXYZRLWP";
 const REVENUECAT_GOOGLE_KEY = import.meta.env.VITE_REVENUECAT_GOOGLE_API_KEY ?? "";
 
 type PurchasesModule = typeof import("@revenuecat/purchases-capacitor");
