@@ -13,8 +13,17 @@ public class NativeAuthPlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationP
         DispatchQueue.main.async {
             guard self.session == nil else { call.reject("Sign-in is already in progress."); return }
             guard let value = call.getString("url"), let url = URL(string: value),
-                  url.scheme == "https", url.host == "emyrcjsikkdnublfudmj.supabase.co",
-                  url.path == "/auth/v1/authorize" else {
+                  url.scheme == "https", url.host == "parently-babytracking.com", url.port == nil,
+                  url.user == nil, url.password == nil, url.fragment == nil,
+                  url.path == "/~oauth/initiate",
+                  let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
+                  let provider = items.first(where: { $0.name == "provider" })?.value,
+                  ["apple", "google"].contains(provider),
+                  let redirectValue = items.first(where: { $0.name == "redirect_uri" })?.value,
+                  let redirect = URL(string: redirectValue),
+                  redirect.scheme == "https", redirect.host == url.host, redirect.port == nil,
+                  redirect.user == nil, redirect.password == nil, redirect.fragment == nil,
+                  redirect.path == "/native-auth-callback.html" else {
                 call.reject("Invalid authentication URL."); return
             }
             guard let window = self.bridge?.viewController?.view.window else {
