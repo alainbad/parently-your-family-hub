@@ -5,13 +5,11 @@ import { toast } from "sonner";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import {
-  APP_REVIEW_DEMO_EMAIL,
-  getDevUnlock,
+  getAiChatProduct,
   hasAiChatEntitlement,
   identifyUser,
   isNativeApp,
   restorePurchases,
-  setDevUnlock,
   startAiChatTrial,
 } from "@/lib/purchases";
 
@@ -32,15 +30,36 @@ function ChatScreen() {
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const native = isNativeApp();
-  const isAppReviewAccount = user?.email === APP_REVIEW_DEMO_EMAIL;
+  const [price, setPrice] = useState<string | null>(null);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    let active = true;
+    setEntitled(false);
+    setReady(false);
+    setPrice(null);
+    setPurchaseError(null);
     if (!user) return;
     (async () => {
-      await identifyUser(user.id);
-      setEntitled(await hasAiChatEntitlement());
+      try {
+        await identifyUser(user.id);
+        const hasAccess = await hasAiChatEntitlement();
+        if (active) setEntitled(hasAccess);
+        if (!hasAccess) {
+          const product = await getAiChatProduct();
+          if (active) setPrice(product?.priceString ?? null);
+        }
+        if (active) setReady(true);
+      } catch {
+        if (active) setPurchaseError("Subscriptions could not be loaded. Please try again.");
+      }
     })();
-  }, [user]);
+    return () => {
+      active = false;
+    };
+  }, [user, retry]);
 
   async function handleSubscribe() {
     if (!native) {
@@ -52,7 +71,8 @@ function ChatScreen() {
     setPurchasing(false);
     if (res.status === "success") {
       setEntitled(res.entitled);
-      toast.success("Welcome to Parently AI!");
+      if (res.entitled) toast.success("Welcome to Parently AI!");
+      else toast.info("Your purchase is not active yet. Please try Restore purchase shortly.");
     } else if (res.status === "cancelled") {
       // silent
     } else if (res.status === "error") {
@@ -123,16 +143,20 @@ function ChatScreen() {
                 <div className="flex items-baseline justify-between">
                   <span className="text-sm font-semibold text-ink">Monthly</span>
                   <span className="font-display text-xl font-semibold text-ink">
-                    $2.99<span className="text-xs font-medium text-ink-soft">/mo</span>
+                    {price ?? "—"}
+                    <span className="text-xs font-medium text-ink-soft">/mo</span>
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-ink-soft">Cancel anytime · 7-day free trial</p>
+                <p className="mt-1 text-xs text-ink-soft">
+                  Renews monthly until cancelled. Any eligible introductory offer is shown by the
+                  App Store before confirmation.
+                </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleSubscribe}
-                disabled={purchasing}
+                disabled={purchasing || restoring || !ready || !price || !user}
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-float transition-transform active:scale-[0.98] disabled:opacity-70"
               >
                 {purchasing ? (
@@ -140,13 +164,13 @@ function ChatScreen() {
                 ) : (
                   <Lock className="h-4 w-4" />
                 )}
-                {purchasing ? "Opening App Store…" : "Start free trial"}
+                {purchasing ? "Opening App Store…" : "Subscribe"}
               </button>
 
               <button
                 type="button"
                 onClick={handleRestore}
-                disabled={restoring}
+                disabled={restoring || purchasing || !ready || !user}
                 className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full py-2 text-xs font-semibold text-ink-soft"
               >
                 {restoring ? (
@@ -157,26 +181,42 @@ function ChatScreen() {
                 Restore purchase
               </button>
 
-              {!native || isAppReviewAccount ? (
-                <div className="mt-3 rounded-xl bg-background/60 p-3 text-center text-[11px] text-muted-foreground">
-                  <p>
-                    {native
-                      ? "App Review demo account — unlock without a purchase."
-                      : "Preview mode — purchases run inside the iOS/Android app build."}
-                  </p>
+              {purchaseError && (
+                <p role="alert" className="mt-3 text-sm text-destructive">
+                  {purchaseError}{" "}
                   <button
                     type="button"
-                    onClick={() => {
-                      setDevUnlock(true);
-                      setEntitled(true);
-                      toast.success(native ? "Demo account unlocked." : "Preview unlocked.");
-                    }}
-                    className="mt-2 text-primary underline"
+                    className="underline"
+                    onClick={() => setRetry((n) => n + 1)}
                   >
-                    Unlock for preview testing
+                    Retry
                   </button>
-                </div>
-              ) : null}
+                </p>
+              )}
+              {!native && (
+                <p className="mt-3 text-xs text-ink-soft">
+                  Subscribe or restore purchases in the Parently iOS or Android app.
+                </p>
+              )}
+              {!user && (
+                <Link to="/auth" className="mt-3 block text-center underline">
+                  Sign in to continue
+                </Link>
+              )}
+              <p className="mt-4 text-xs text-ink-soft">
+                Payment is charged to your store account. Manage or cancel your subscription in your
+                device’s subscription settings.
+              </p>
+              <div className="mt-3 flex justify-center gap-4 text-xs underline">
+                <a
+                  href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Terms of Use
+                </a>
+                <Link to="/privacy">Privacy Policy</Link>
+              </div>
             </div>
           </div>
         )}
@@ -186,7 +226,6 @@ function ChatScreen() {
 }
 
 function UnlockedPlaceholder() {
-  const dev = getDevUnlock();
   return (
     <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
       <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
@@ -204,18 +243,6 @@ function UnlockedPlaceholder() {
         <MessageSquare className="h-4 w-4" />
         Open Parently AI chat
       </Link>
-      {dev ? (
-        <button
-          type="button"
-          onClick={() => {
-            setDevUnlock(false);
-            location.reload();
-          }}
-          className="mt-3 w-full text-center text-[11px] text-muted-foreground underline"
-        >
-          Lock preview again
-        </button>
-      ) : null}
     </div>
   );
 }

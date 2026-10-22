@@ -22,6 +22,7 @@ export const Route = createFileRoute("/profile")({
 function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [accountDeleted, setAccountDeleted] = useState(false);
+  const [appleDisconnectRequired, setAppleDisconnectRequired] = useState(false);
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [babyName, setBabyName] = useState("");
@@ -50,6 +51,24 @@ function ProfileScreen() {
           subtitle="Your account and associated personal data have been deleted. You are signed out."
         />
         <div className="px-6">
+          {appleDisconnectRequired ? (
+            <section className="mb-6 rounded-2xl border border-border bg-surface p-5">
+              <h2 className="font-semibold">Disconnect Sign in with Apple</h2>
+              <p className="mt-2 text-sm text-ink-soft">
+                Your Parently account is deleted. Apple may still list Parently as a connected app.
+                On your iPhone or iPad, open Settings, tap your name, then Sign in with Apple.
+                Select Parently or its developer and tap Delete to stop using Apple sign-in.
+              </p>
+              <a
+                href="https://support.apple.com/en-us/102571"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-block font-semibold text-primary"
+              >
+                Apple's instructions
+              </a>
+            </section>
+          ) : null}
           <Link
             to="/home"
             className="inline-flex rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground"
@@ -181,7 +200,12 @@ function ProfileScreen() {
 
         <FamilySharingSection />
 
-        <DeleteAccountSection onDeleted={() => setAccountDeleted(true)} />
+        <DeleteAccountSection
+          onDeleted={(disconnectApple) => {
+            setAppleDisconnectRequired(disconnectApple);
+            setAccountDeleted(true);
+          }}
+        />
 
         <button
           onClick={async () => {

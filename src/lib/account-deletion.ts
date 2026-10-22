@@ -21,6 +21,9 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { eraseAccount } = await import("@/lib/account-deletion.server");
+    const { revokeStoredAppleTokens } = await import("@/lib/apple-token-store.server");
+    // Revoke on Apple's server first; a transient failure retains the account for retry.
+    const appleRevoked = await revokeStoredAppleTokens(data.user.id);
     try {
       await eraseAccount(supabaseAdmin, data.user.id, token);
     } catch (error) {
@@ -32,5 +35,13 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
         "Deletion could not finish. Some data may already have been removed. Please retry; if your session expired, sign in again first.",
       );
     }
-    return { deleted: true };
+    // Older broker accounts may have no Apple provider token. Do not block deletion
+    // when automatic revocation is unavailable (Apple TN3194 fallback).
+    const appleDisconnectRequired =
+      !appleRevoked &&
+      (data.user.identities?.some((identity) => identity.provider === "apple") === true ||
+        data.user.app_metadata?.provider === "apple" ||
+        (Array.isArray(data.user.app_metadata?.providers) &&
+          data.user.app_metadata.providers.includes("apple")));
+    return { deleted: true, appleDisconnectRequired };
   });
