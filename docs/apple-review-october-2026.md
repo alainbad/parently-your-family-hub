@@ -63,3 +63,9 @@ The installed cloud-auth-js API exposes only Supabase access/refresh tokens and 
 ## Direct Apple integration draft
 
 Added native AuthenticationServices and web Apple JS sign-in, server validation/code exchange, encrypted provider-token storage, and revocation before account deletion. Activation and exact owner-entered secrets are documented in `docs/direct-apple-auth-setup.md`. Both feature flags remain disabled by default. The migration has not been applied; direct Supabase Apple audience support in Lovable remains unverified. Do not interpret the implemented code as a live or submission-ready fix.
+
+## October 25 native compilation verification
+
+Resolved CapApp-SPM through Xcode 27.1's normal package resolver in an isolated local checkout and successfully built the App scheme for the iPhone 18 Pro simulator. The resolved package versions are now recorded in the app workspace: Capacitor 8.4.1, purchases-hybrid-common 18.19.0, and RevenueCat 5.80.2. No source dependency replacement was required. The restricted command runner failed to execute SwiftPM's nested sandbox and initially could not write its manifest/compiler caches; those errors did not establish a broken package manifest. Opening the isolated project in Xcode resolved the package graph and compiled the native Swift code successfully.
+
+The production web build and all 25 existing regression tests passed locally. Separately, the isolated Lovable remix completed web broker Apple login with the Services ID alone and retained its session after reload. This does not verify direct native token audiences, token retention/revocation, device purchase/restore, production deployment, or archive/upload.
