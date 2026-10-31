@@ -8,6 +8,7 @@ const HASH_KEYS_TO_REMOVE = [
   "expires_at",
   "expires_in",
   "provider_token",
+  "provider_refresh_token",
   "token_type",
   "type",
   "error",
@@ -41,7 +42,11 @@ function cleanOAuthUrl() {
   }
 
   if (changed) {
-    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
   }
 }
 
@@ -55,28 +60,48 @@ export async function restoreOAuthSessionFromUrl(): Promise<{
   const searchParams = new URLSearchParams(window.location.search);
   const urlError = hashParams.get("error_description") ?? searchParams.get("error_description");
 
-  if (urlError) {
+  if (urlError || hashParams.has("error") || searchParams.has("error")) {
     cleanOAuthUrl();
-    return { session: null, error: urlError };
+    return { session: null, error: "Sign-in was not completed. Please try again." };
   }
 
   const accessToken = hashParams.get("access_token");
   const refreshToken = hashParams.get("refresh_token");
   if (accessToken && refreshToken) {
-    const { data, error } = await supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-    cleanOAuthUrl();
-    return { session: data.session, error: error?.message ?? null };
+    try {
+      const { data, error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+      return {
+        session: data.session,
+        error: error ? "Sign-in could not be completed. Please try again." : null,
+      };
+    } catch {
+      return { session: null, error: "Sign-in could not be completed. Please try again." };
+    } finally {
+      cleanOAuthUrl();
+    }
   }
 
   const code = searchParams.get("code");
   if (code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    cleanOAuthUrl();
-    return { session: data.session, error: error?.message ?? null };
+    try {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      return {
+        session: data.session,
+        error: error ? "Sign-in could not be completed. Please try again." : null,
+      };
+    } catch {
+      return { session: null, error: "Sign-in could not be completed. Please try again." };
+    } finally {
+      cleanOAuthUrl();
+    }
   }
 
+  if (accessToken || refreshToken) {
+    cleanOAuthUrl();
+    return { session: null, error: "Sign-in returned an incomplete session. Please try again." };
+  }
   return { session: null, error: null };
 }

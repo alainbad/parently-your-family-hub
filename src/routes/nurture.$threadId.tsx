@@ -47,7 +47,11 @@ function ThreadChat() {
     return (
       <ChatShell threadId={threadId}>
         <p className="p-6 text-sm text-ink-soft">
-          Please <Link to="/auth" className="font-semibold text-primary">sign in</Link>.
+          Please{" "}
+          <Link to="/auth" className="font-semibold text-primary">
+            sign in
+          </Link>
+          .
         </p>
       </ChatShell>
     );
@@ -87,13 +91,17 @@ function ChatShell({
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Parently AI
           </p>
-          <h1 className="truncate font-display text-base font-semibold text-ink">
-            Ask anything
-          </h1>
+          <h1 className="truncate font-display text-base font-semibold text-ink">Ask anything</h1>
         </div>
       </header>
       <div className="flex-1 overflow-hidden">
-        {loading ? <div className="p-6"><Shimmer>Loading conversation…</Shimmer></div> : children}
+        {loading ? (
+          <div className="p-6">
+            <Shimmer>Loading conversation…</Shimmer>
+          </div>
+        ) : (
+          children
+        )}
       </div>
     </div>
   );
@@ -120,7 +128,7 @@ function ChatWindow({
     [threadId, token],
   );
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, regenerate } = useChat({
     id: threadId,
     messages: initialMessages,
     transport,
@@ -148,15 +156,10 @@ function ChatWindow({
             </div>
           ) : null}
           {messages.map((m) => {
-            const text = m.parts
-              .map((p) => (p.type === "text" ? p.text : ""))
-              .join("");
+            const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
             const isUser = m.role === "user";
             return (
-              <div
-                key={m.id}
-                className={isUser ? "flex justify-end" : "flex justify-start"}
-              >
+              <div key={m.id} className={isUser ? "flex justify-end" : "flex justify-start"}>
                 <div
                   className={
                     isUser
@@ -174,17 +177,36 @@ function ChatWindow({
               <Shimmer>Parently AI is thinking…</Shimmer>
             </div>
           ) : null}
+          {error ? (
+            <div
+              role="alert"
+              className="rounded-2xl border border-destructive/40 bg-surface p-4 text-sm text-ink"
+            >
+              <p>
+                {error.message === "Subscriptions could not be verified. Please try again shortly."
+                  ? "Your subscription could not be verified. Please try again shortly."
+                  : error.message === "Unauthorized"
+                    ? "Your session has expired. Please sign in again."
+                    : error.message.startsWith("An active Parently AI subscription")
+                      ? "Your subscription is not active. Subscribe or restore purchases from Premium."
+                      : "Parently AI could not reply. Please try again."}
+              </p>
+              <button
+                type="button"
+                onClick={() => void regenerate()}
+                className="mt-3 font-semibold text-primary"
+              >
+                Try again
+              </button>
+            </div>
+          ) : null}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
 
       <div className="safe-bottom border-t border-border bg-background/95 px-3 py-3 backdrop-blur">
         <PromptInput onSubmit={handleSubmit}>
-          <PromptInputTextarea
-            ref={textareaRef}
-            placeholder="Ask Parently AI…"
-            autoFocus
-          />
+          <PromptInputTextarea ref={textareaRef} placeholder="Ask Parently AI…" autoFocus />
           <PromptInputFooter className="justify-end">
             <PromptInputSubmit status={status} disabled={busy} />
           </PromptInputFooter>

@@ -5,9 +5,10 @@ export const AI_CHAT_MONTHLY_PRODUCT_ID = "parently_ai_chat_monthly";
 export const AI_CHAT_ENTITLEMENT_ID = "ai_chat";
 
 // RevenueCat public API keys (safe to embed in the app binary — RevenueCat design).
-// Add real values once the RevenueCat project is created.
-const REVENUECAT_APPLE_KEY = "appl_PLACEHOLDER";
-const REVENUECAT_GOOGLE_KEY = "goog_PLACEHOLDER";
+// The default belongs to Parently (App Store); staging can override it at build time.
+const REVENUECAT_APPLE_KEY =
+  import.meta.env.VITE_REVENUECAT_APPLE_API_KEY ?? "appl_sLGVNLgmhcPlAACtpjAYXYZRLWP";
+const REVENUECAT_GOOGLE_KEY = import.meta.env.VITE_REVENUECAT_GOOGLE_API_KEY ?? "";
 
 type PurchasesModule = typeof import("@revenuecat/purchases-capacitor");
 
@@ -16,11 +17,19 @@ let purchasesPromise: Promise<PurchasesModule | null> | null = null;
 async function loadPurchases(): Promise<PurchasesModule | null> {
   if (!Capacitor.isNativePlatform()) return null;
   if (!purchasesPromise) {
-    purchasesPromise = import("@revenuecat/purchases-capacitor").then(async (mod) => {
-      const key = Capacitor.getPlatform() === "ios" ? REVENUECAT_APPLE_KEY : REVENUECAT_GOOGLE_KEY;
-      await mod.Purchases.configure({ apiKey: key });
-      return mod;
-    });
+    purchasesPromise = import("@revenuecat/purchases-capacitor")
+      .then(async (mod) => {
+        const key =
+          Capacitor.getPlatform() === "ios" ? REVENUECAT_APPLE_KEY : REVENUECAT_GOOGLE_KEY;
+        if (!key || key.includes("PLACEHOLDER"))
+          throw new Error("Subscriptions are temporarily unavailable. Please try again later.");
+        await mod.Purchases.configure({ apiKey: key });
+        return mod;
+      })
+      .catch((error) => {
+        purchasesPromise = null;
+        throw error;
+      });
   }
   return purchasesPromise;
 }
@@ -31,26 +40,18 @@ export async function identifyUser(userId: string): Promise<void> {
   await mod.Purchases.logIn({ appUserID: userId });
 }
 
-// Apple/Google App Review sign in with this account. RevenueCat isn't wired up
-// with real keys yet, so this lets review unlock the paid AI chat screen
-// without a real purchase — scoped to this one email, not a general bypass.
-export const APP_REVIEW_DEMO_EMAIL = "badranalain87+applereview@gmail.com";
-
-const DEV_UNLOCK_KEY = "nurture_dev_unlock";
-
-export function setDevUnlock(on: boolean) {
-  if (typeof window === "undefined") return;
-  if (on) localStorage.setItem(DEV_UNLOCK_KEY, "1");
-  else localStorage.removeItem(DEV_UNLOCK_KEY);
-}
-
-export function getDevUnlock(): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(DEV_UNLOCK_KEY) === "1";
+export async function getAiChatProduct() {
+  const mod = await loadPurchases();
+  if (!mod) return null;
+  const offerings = await mod.Purchases.getOfferings();
+  const pkg = offerings.current?.availablePackages.find(
+    (p) => p.product.identifier === AI_CHAT_MONTHLY_PRODUCT_ID,
+  );
+  if (!pkg) throw new Error("Subscription not available. Please try again later.");
+  return pkg.product;
 }
 
 export async function hasAiChatEntitlement(): Promise<boolean> {
-  if (getDevUnlock()) return true;
   const mod = await loadPurchases();
   if (!mod) return false;
   const info = await mod.Purchases.getCustomerInfo();
@@ -64,10 +65,9 @@ export type PurchaseResult =
   | { status: "success"; entitled: boolean };
 
 export async function startAiChatTrial(): Promise<PurchaseResult> {
-  const mod = await loadPurchases();
-  if (!mod) return { status: "unavailable" };
-
   try {
+    const mod = await loadPurchases();
+    if (!mod) return { status: "unavailable" };
     const offerings = await mod.Purchases.getOfferings();
     const pkg = offerings.current?.availablePackages.find(
       (p) => p.product.identifier === AI_CHAT_MONTHLY_PRODUCT_ID,
@@ -87,9 +87,9 @@ export async function startAiChatTrial(): Promise<PurchaseResult> {
 }
 
 export async function restorePurchases(): Promise<PurchaseResult> {
-  const mod = await loadPurchases();
-  if (!mod) return { status: "unavailable" };
   try {
+    const mod = await loadPurchases();
+    if (!mod) return { status: "unavailable" };
     const { customerInfo } = await mod.Purchases.restorePurchases();
     return {
       status: "success",
