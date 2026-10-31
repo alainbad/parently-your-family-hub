@@ -61,7 +61,7 @@ function PrivacyPolicy() {
           <ul className="mt-2 list-disc space-y-1.5 pl-5">
             <li>
               <strong>Account information:</strong> your email address, used to sign in (directly or
-              via Google Sign-In).
+              via Apple or Google Sign-In).
             </li>
             <li>
               <strong>Profile information:</strong> your baby's name, photo, birth date or due date,
@@ -82,6 +82,12 @@ function PrivacyPolicy() {
               to our AI provider to generate responses.
             </li>
             <li>
+              <strong>Sponsored-link interactions:</strong> when you tap a sponsored product link,
+              we store the product title, retailer, destination URL, where the link appeared, and
+              your account ID if you are signed in. We use these records to measure which links are
+              used.
+            </li>
+            <li>
               <strong>Subscription status:</strong> whether you have an active Parently AI
               subscription. Payment details (card numbers, etc.) are handled entirely by Apple,
               Google, or our billing partner RevenueCat — we never see or store them.
@@ -96,8 +102,8 @@ function PrivacyPolicy() {
           <p className="mt-2">
             To run the app: save and sync your logs, show your baby's stage-appropriate content,
             remind you about upcoming appointments, power the AI chat, and manage your subscription.
-            We do not sell your data, and we do not run third-party advertising or analytics inside
-            the app.
+            We do not sell your data. Sponsored product links are labeled in the app, and we record
+            interactions with those links as described above.
           </p>
         </section>
 
