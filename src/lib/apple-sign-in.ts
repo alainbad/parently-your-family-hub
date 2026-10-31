@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
-import { retainAppleAuthorization } from "./apple-auth";
+import { checkAppleSignInConfiguration, retainAppleAuthorization } from "./apple-auth";
 
 type AppleResponse = { identityToken: string; authorizationCode: string; fullName?: string };
 type AppleJS = {
@@ -71,6 +71,8 @@ export async function directAppleSignIn() {
   // has retained the Apple authorization. Failed retention must not log in.
   let pendingAuth: SupabaseClient | undefined;
   try {
+    // Fail before asking the owner for Apple's system confirmation when server setup is incomplete.
+    await checkAppleSignInConfiguration();
     const url = import.meta.env.VITE_SUPABASE_URL;
     const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) throw new Error("Apple sign-in is not configured yet.");
@@ -98,7 +100,7 @@ export async function directAppleSignIn() {
       ).join("");
       // Register this exact URL with Apple and in APPLE_WEB_REDIRECT_URI.
       apple.auth.init({
-        clientId: "com.parentlybabytracking.app.web",
+        clientId: "com.parentlybabytracking.app.web.direct",
         scope: "name email",
         redirectURI: `${window.location.origin}/auth-callback`,
         state,

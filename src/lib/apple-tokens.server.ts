@@ -11,7 +11,7 @@ import {
 
 export const APPLE_CLIENTS = {
   ios: "com.parentlybabytracking.app",
-  web: "com.parentlybabytracking.app.web",
+  web: "com.parentlybabytracking.app.web.direct",
 } as const;
 const issuer = "https://appleid.apple.com";
 const appleKeys = createRemoteJWKSet(new URL(`${issuer}/auth/keys`));
@@ -78,10 +78,20 @@ export async function verifyAppleIdentity(
 async function clientSecret(clientId: string) {
   if (!Object.values(APPLE_CLIENTS).includes(clientId as typeof APPLE_CLIENTS.ios))
     throw new Error("Invalid Apple client.");
-  const key = await importPKCS8(
-    required("APPLE_SIGN_IN_PRIVATE_KEY").replace(/\\n/g, "\n"),
-    "ES256",
-  );
+  const pem = required("APPLE_SIGN_IN_PRIVATE_KEY")
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .trim();
+  let key;
+  try {
+    key = await importPKCS8(pem, "ES256");
+  } catch {
+    console.error("[Apple auth] APPLE_SIGN_IN_PRIVATE_KEY requires the complete PKCS#8 .p8 PEM.");
+    throw new Error(
+      "Apple sign-in is not configured correctly. Please contact support or sign in with email.",
+    );
+  }
   return new SignJWT({})
     .setProtectedHeader({ alg: "ES256", kid: required("APPLE_SIGN_IN_KEY_ID") })
     .setIssuer(required("APPLE_SIGN_IN_TEAM_ID"))
@@ -90,6 +100,10 @@ async function clientSecret(clientId: string) {
     .setIssuedAt()
     .setExpirationTime("5m")
     .sign(key);
+}
+export async function assertAppleSignInConfiguration() {
+  encryptionKey();
+  await clientSecret(APPLE_CLIENTS.ios);
 }
 export async function exchangeAppleCode(
   code: string,

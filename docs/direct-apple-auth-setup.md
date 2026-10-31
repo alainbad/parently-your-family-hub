@@ -1,6 +1,6 @@
 # Direct Apple authorization — setup required before activation
 
-This implementation is in draft PR #37. It has not been deployed or tested with a real Apple account or compiled in Xcode. The default remains the existing Lovable broker until the client flag is explicitly enabled.
+This implementation is in draft PR #37. The isolated test deployment has passed native iPhone/iPad login, web Hide My Email, encrypted authorization retention and deletion/revocation checks. Production is not activated. See `verified-release-checks-2026-10-31.md` for verified results and remaining rollout gates. The default remains the existing Lovable broker until the client flag is explicitly enabled.
 
 ## What the code does
 
@@ -15,11 +15,12 @@ This implementation is in draft PR #37. It has not been deployed or tested with 
 
 1. Apply `supabase/migrations/20261022120000_apple_provider_tokens.sql` to the intended backend. Keep the existing migration history. No production migration has been run by this change.
 2. The **direct Supabase Auth Apple provider** must accept BOTH audiences:
-   - `com.parentlybabytracking.app.web` (web Services ID)
+   - `com.parentlybabytracking.app.web.direct` (new direct web Services ID)
+   - `com.parentlybabytracking.app.web` (existing broker Services ID, retained)
    - `com.parentlybabytracking.app` (iOS Bundle ID)
 
    Lovable's broker configuration is not proof of this. Lovable does not document direct `signInWithIdToken` support for this project. Confirm the underlying Auth configuration with the platform before activation; if it cannot be configured, this integration cannot be activated on that backend. Do not replace the Services ID with the Bundle ID in the existing broker form.
-3. Add `https://parently-babytracking.com/auth-callback` to the Apple Services ID Return URLs, preserving existing broker URLs. Register the exact staging origin's callback too. The Services ID and native App ID must belong to the same primary App ID group/team. Verify an existing Apple account retains its Supabase UUID; do not merge accounts by email.
+3. Register the separate production Services ID `com.parentlybabytracking.app.web.direct` with domain `parently-babytracking.com` and Return URL `https://parently-babytracking.com/auth-callback`, preserving the existing broker Services ID and its URLs. Its current website-URL list is at the limit; no legacy callback is removed. Register the exact staging origin's callback too. The Services ID and native App ID must belong to the same primary App ID group/team. Creating the new client, expanding accepted audiences and activation require the owner’s production authorization. Verify an existing Apple account retains its Supabase UUID; do not merge accounts by email.
 4. The owner enters these **server-only** values in staging secrets. Never put them in chat, source control, frontend configuration, or a variable beginning with `VITE_`:
 
    | Name | Value |
@@ -33,7 +34,7 @@ This implementation is in draft PR #37. It has not been deployed or tested with 
 
    Keep a secure backup of the encryption key. Changing it without re-encrypting existing rows makes stored tokens unusable. Keep server secrets available for deletion even if rolling the client back to broker login. The code generates a short-lived Apple client-secret JWT on demand.
 5. Set build-time `VITE_APPLE_DIRECT_AUTH_ENABLED=true` only in the staging build being tested. Existing `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` must point to that backend. This flag is public and contains no credential.
-6. Build the web application and native shell together. `npx cap sync ios`, then open the Xcode project, select team CK3N6ZTEN8, regenerate provisioning profiles with Sign in with Apple, and verify the shell loads the intended staging URL. Xcode/native signing cannot be tested from this environment.
+6. Build the web application and native shell together. `npx cap sync ios`, then open the Xcode project, select team CK3N6ZTEN8, regenerate provisioning profiles with Sign in with Apple, and verify the shell loads the intended staging URL. Native development compilation and signing passed in the isolated test project; archive and production-specific checks remain required.
 
 ## Required acceptance tests
 

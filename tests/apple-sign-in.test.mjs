@@ -10,8 +10,9 @@ const source = ts
   })
   .outputText.replace(/import.meta.env.VITE_SUPABASE_URL/g, '"https://test.example"')
   .replace(/import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY/g, '"public-key"');
-function harness(failRetention = false, rejectIdentity = false) {
+function harness(failRetention = false, rejectIdentity = false, failConfiguration = false) {
   const calls = [];
+  let nativeRequests = 0;
   const exports = {};
   vm.runInNewContext(source, {
     exports,
@@ -47,6 +48,7 @@ function harness(failRetention = false, rejectIdentity = false) {
           Capacitor: { getPlatform: () => "ios", isPluginAvailable: () => true },
           registerPlugin: () => ({
             apple: async ({ nonce }) => {
+              nativeRequests++;
               assert.match(nonce, /^[a-f0-9]{64}$/);
               return { identityToken: "apple-jwt", authorizationCode: "apple-code" };
             },
@@ -54,6 +56,10 @@ function harness(failRetention = false, rejectIdentity = false) {
         };
       if (name === "./apple-auth")
         return {
+          checkAppleSignInConfiguration: async () => {
+            if (failConfiguration) throw new Error("setup incomplete");
+            return { ready: true };
+          },
           retainAppleAuthorization: async ({ data }) => {
             calls.push("retain");
             assert.equal(data.accessToken, "session");
@@ -75,8 +81,14 @@ function harness(failRetention = false, rejectIdentity = false) {
       throw new Error(name);
     },
   });
-  return { run: exports.directAppleSignIn, calls };
+  return { run: exports.directAppleSignIn, calls, nativeRequests: () => nativeRequests };
 }
+test("invalid server setup fails before requesting Apple's native password confirmation", async () => {
+  const h = harness(false, false, true);
+  await assert.rejects(h.run(), /setup incomplete/);
+  assert.equal(h.nativeRequests(), 0);
+  assert.deepEqual(h.calls, []);
+});
 test("native Apple login retains authorization before publishing the session", async () => {
   const h = harness();
   await h.run();

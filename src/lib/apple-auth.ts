@@ -1,6 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+export const checkAppleSignInConfiguration = createServerFn({ method: "POST" }).handler(
+  async () => {
+    if (process.env.APPLE_DIRECT_AUTH_ENABLED !== "true")
+      throw new Error("Direct Apple sign-in is not enabled yet.");
+    const { assertAppleSignInConfiguration } = await import("./apple-tokens.server");
+    await assertAppleSignInConfiguration();
+    return { ready: true };
+  },
+);
+
 export const retainAppleAuthorization = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z

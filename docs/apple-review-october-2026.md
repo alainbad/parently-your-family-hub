@@ -1,6 +1,6 @@
 # October 2026 App Review fixes — NOT ready to resubmit
 
-Review rejected version 1.0 (1). This branch prepares build 2; choose a higher number if 2 has already been uploaded. Native Swift compilation and device testing require Xcode and have not been performed here.
+Review rejected version 1.0 (1). This branch prepares build 2; choose a higher number if 2 has already been uploaded. See `verified-release-checks-2026-10-31.md` for the current native/device validation and remaining production rollout gates.
 
 ## Implemented
 
@@ -69,3 +69,8 @@ Added native AuthenticationServices and web Apple JS sign-in, server validation/
 Resolved CapApp-SPM through Xcode 27.1's normal package resolver in an isolated local checkout and successfully built the App scheme for the iPhone 18 Pro simulator. The resolved package versions are now recorded in the app workspace: Capacitor 8.4.1, purchases-hybrid-common 18.19.0, and RevenueCat 5.80.2. No source dependency replacement was required. The restricted command runner failed to execute SwiftPM's nested sandbox and initially could not write its manifest/compiler caches; those errors did not establish a broken package manifest. Opening the isolated project in Xcode resolved the package graph and compiled the native Swift code successfully.
 
 The production web build and all 25 existing regression tests passed locally. Separately, the isolated Lovable remix completed web broker Apple login with the Services ID alone and retained its session after reload. This does not verify direct native token audiences, token retention/revocation, device purchase/restore, production deployment, or archive/upload.
+
+
+## October 31 verified staging follow-up
+
+Native iPhone/iPad Apple login, web Hide My Email, encrypted token retention, deletion/revocation, physical sandbox purchase, AI reply and restore passed in the isolated test deployment. Server entitlement lookup now uses the supported public app key for customer-info GET; a privileged RevenueCat secret is not required for this lookup. The native shell targets production with bridge logging disabled. Production configuration, deployment, final release testing and submission remain pending. See `verified-release-checks-2026-10-31.md`.

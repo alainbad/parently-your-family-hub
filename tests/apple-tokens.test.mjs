@@ -101,3 +101,23 @@ test("revocation must succeed and sends refresh token in POST body only", async 
     api.revokeAppleToken("refresh-secret", client, async () => new Response(null, { status: 500 })),
   );
 });
+test("signing accepts pasted whitespace and escaped line endings, rejects malformed keys before sending", async () => {
+  const original = process.env.APPLE_SIGN_IN_PRIVATE_KEY;
+  try {
+    for (const formatted of ["\ufeff \n" + original + "\n ", original.replace(/\n/g, "\\r\\n")]) {
+      process.env.APPLE_SIGN_IN_PRIVATE_KEY = formatted;
+      let called = false;
+      await api.exchangeAppleCode("code", client, async () => {
+        called = true;
+        return Response.json({ refresh_token: "refresh", id_token: "identity" });
+      });
+      assert.equal(called, true);
+    }
+    process.env.APPLE_SIGN_IN_PRIVATE_KEY = "not-a-private-key";
+    await assert.rejects(api.exchangeAppleCode("code", client, async () => {
+      assert.fail("Malformed keys must not reach Apple");
+    }), /Apple sign-in is not configured correctly/);
+  } finally {
+    process.env.APPLE_SIGN_IN_PRIVATE_KEY = original;
+  }
+});

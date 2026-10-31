@@ -31,9 +31,7 @@ test("active, lifetime and billing grace entitlements retain access", () => {
 });
 test("provider errors fail closed, never grant access", async () => {
   const original = globalThis.fetch;
-  const originalKey = process.env.REVENUECAT_SECRET_API_KEY;
   try {
-    process.env.REVENUECAT_SECRET_API_KEY = "test";
     globalThis.fetch = async () => new Response("", { status: 503 });
     await assert.rejects(userHasAiSubscription("test-user"));
     globalThis.fetch = async () => new Response("{}");
@@ -42,7 +40,29 @@ test("provider errors fail closed, never grant access", async () => {
     assert.equal(await userHasAiSubscription("test-user"), false);
   } finally {
     globalThis.fetch = original;
-    if (originalKey === undefined) delete process.env.REVENUECAT_SECRET_API_KEY;
-    else process.env.REVENUECAT_SECRET_API_KEY = originalKey;
+  }
+});
+test("server lookup uses the authenticated user and checks provider entitlement", async () => {
+  const original = globalThis.fetch;
+  const originalKey = process.env.REVENUECAT_APPLE_API_KEY;
+  try {
+    process.env.REVENUECAT_APPLE_API_KEY = " appl_test ";
+    globalThis.fetch = async (url, options) => {
+      assert.equal(url, "https://api.revenuecat.com/v1/subscribers/signed-in-user");
+      assert.equal(options.headers.Authorization, "Bearer appl_test");
+      assert.equal(options.cache, "no-store");
+      return Response.json({
+        subscriber: {
+          entitlements: { ai_chat: { expires_date: new Date(Date.now() + 60000).toISOString() } },
+        },
+      });
+    };
+    assert.equal(await userHasAiSubscription("signed-in-user"), true);
+    globalThis.fetch = async () => Response.json({ subscriber: { entitlements: {} } });
+    assert.equal(await userHasAiSubscription("signed-in-user"), false);
+  } finally {
+    globalThis.fetch = original;
+    if (originalKey === undefined) delete process.env.REVENUECAT_APPLE_API_KEY;
+    else process.env.REVENUECAT_APPLE_API_KEY = originalKey;
   }
 });

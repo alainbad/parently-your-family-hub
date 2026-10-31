@@ -12,8 +12,13 @@ export function entitlementIsActive(
 }
 
 export async function userHasAiSubscription(userId: string): Promise<boolean> {
-  const key = process.env.REVENUECAT_SECRET_API_KEY;
-  if (!key) throw new Error("Subscription service is not configured");
+  // Customer-info GET supports the same public app key used by the native SDK.
+  // Keep verification on the server; no client-supplied entitlement is trusted.
+  // A privileged secret is unnecessary for this lookup.
+  const key =
+    process.env.REVENUECAT_APPLE_API_KEY?.trim() ||
+    process.env.VITE_REVENUECAT_APPLE_API_KEY?.trim() ||
+    "appl_sLGVNLgmhcPlAACtpjAYXYZRLWP";
   const response = await fetch(
     `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`,
     {
@@ -23,10 +28,18 @@ export async function userHasAiSubscription(userId: string): Promise<boolean> {
     },
   );
   if (response.status === 404) return false;
-  if (!response.ok) throw new Error("Subscription service unavailable");
+  if (!response.ok) {
+    // Report only the status, never credentials, subscriber IDs or response bodies.
+    console.error(
+      `Subscription verification (app-key): RevenueCat returned HTTP ${response.status}`,
+    );
+    throw new Error("Subscription service unavailable");
+  }
   const data = (await response.json()) as {
     subscriber?: { entitlements?: Record<string, Entitlement> };
   };
   if (!data.subscriber?.entitlements) throw new Error("Invalid subscription response");
   return entitlementIsActive(data.subscriber.entitlements.ai_chat);
 }
+
+// Server verification uses live RevenueCat customer info.

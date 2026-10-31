@@ -220,6 +220,21 @@ function ChatScreen() {
             </div>
           </div>
         )}
+        {entitled && native ? (
+          <button
+            type="button"
+            onClick={handleRestore}
+            disabled={restoring || purchasing || !ready}
+            className="mt-4 flex w-full items-center justify-center gap-2 py-3 text-sm font-semibold text-ink-soft disabled:opacity-50"
+          >
+            {restoring ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="h-4 w-4" />
+            )}
+            Restore purchase
+          </button>
+        ) : null}
       </div>
     </AppShell>
   );
