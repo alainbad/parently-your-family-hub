@@ -26,3 +26,9 @@ Always fully restart the native app after web publication. An existing document 
 ## Production review checkout validation
 
 October 31: TypeScript and all 28 regression tests pass. Default web build and changed-file lint pass. The production-targeted generic iOS build succeeds with signing team CK3N6ZTEN8; native configuration loads https://parently-babytracking.com with loggingBehavior none. Dependencies remain the tested Capacitor 8.5.3 / RevenueCat 5.80.2 graph. No test backend/domain/client ID is present in release source. An actual production account/login/purchase check, distribution archive/upload and App Review submission remain pending.
+
+## Approved production setup — October 31
+
+Owner explicitly approved production registration, audience expansion, private token-table migration, merge/deploy and activation. Registered Services ID com.parentlybabytracking.app.web.direct (Apple object N72PUSNFYS), grouped with the native Parently App ID. Saved domain parently-babytracking.com and exact /auth-callback Return URL. Legacy Services ID/callbacks preserved. Owner saved production signing/encryption credentials directly in Lovable; values were not read. Public key/team identifiers and redirect URI saved. Production provider now accepts legacy web, direct web and native client IDs.
+
+Created the private token table in a transaction, including all three allowed client IDs. Verified RLS true, zero policies, no anon/authenticated privileges, and required service-role access. Migration create is idempotent for subsequent deployment. Client activation flag is now enabled under owner authorization; server flag and publication must match. A fresh production runtime/login test remains required before submission.
