@@ -70,6 +70,11 @@ function LearnScreen() {
       <ScreenHeader eyebrow="Learn" title="Grow with your baby" />
 
       <div className="px-6">
+        <p className="mb-4 rounded-xl border border-border bg-surface p-3 text-sm text-ink">
+          Learn is for general information. Consult your doctor before making medical decisions for
+          yourself or your child. Each article links to its sources.
+        </p>
+
         <label className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.25rem] border border-border bg-surface px-4 py-3 shadow-soft">
           <Search className="h-4 w-4 text-ink-soft" />
           <input

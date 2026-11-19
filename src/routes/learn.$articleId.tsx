@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { CATEGORY_PHOTOS, getArticleById, type LearnArticle } from "@/lib/learn-articles";
 
 export const Route = createFileRoute("/learn/$articleId")({
@@ -98,6 +98,30 @@ function ArticleScreen() {
         </h1>
         <p className="mt-1.5 text-[12px] text-ink-soft">{article.readTime}</p>
         <p className="mt-3 text-[14px] leading-relaxed text-ink-soft">{article.excerpt}</p>
+        <p className="mt-4 rounded-xl border border-border bg-surface p-3 text-sm text-ink">
+          This guide is for general information. Consult your doctor before making medical decisions
+          for yourself or your child.
+        </p>
+        <section className="mt-4" aria-labelledby="learn-sources">
+          <h2 id="learn-sources" className="font-display text-[16px] font-semibold text-ink">
+            Sources
+          </h2>
+          <ul className="mt-1">
+            {article.sources.map((source) => (
+              <li key={source.url}>
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center gap-2 break-words py-1 text-sm text-primary underline underline-offset-2"
+                >
+                  {source.title}
+                  <ExternalLink aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <div
           className="
